@@ -9,7 +9,7 @@ import { PrivateRoute } from "./PrivateRoute";
 import { PublicRoute } from "./PublicRoute";
 
 /** Components */
-import { LoginPage } from "../pages";
+import { HomePage, LoginPage } from "../pages";
 import { useAuthStore } from "../hooks";
 import { useEffect } from "react";
 
@@ -46,6 +46,16 @@ export const AppRouter = (): JSX.Element => {
     <BrowserRouter>
 
       <Routes>
+
+        <Route
+          path="/"
+          element={
+            <PrivateRoute isAutenticated={!!_id}>
+              <HomePage />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="login"
           element={

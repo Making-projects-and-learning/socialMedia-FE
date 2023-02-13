@@ -45,31 +45,25 @@ export const useAuthStore = () => {
         online,
     } = useAppSelector((state) => state.auth);
 
-    const startLogin = async (email: string, password: string) => {
+    const startLogin = async (username: string, password: string) => {
         try {
-            // dispatch(uiOpenProgressBackdrop());
+            dispatch(uiOpenProgressBackdrop());
 
-            // const {
-            //     data: { token, user, msg },
-            // } = await socialMediaApi.post("auth/login", { email, password });
-            console.log(email, password)
-            // if (token) {
-            //     localStorage.setItem("token", token);
-            //     localStorage.setItem("token-init-date", new Date().getTime().toString());
+            const {
+                data: { token, user },
+                status
+            } = await socialMediaApi.post("auth/login", { username, password });
 
-            //     // dispatch(
-            //     //     authLogin({
-            //     //         _id: user._id,
-            //     //         name: user.name,
-            //     //         email: user.email,
-            //     //     })
-            //     // );
+            if (status === 200) {
+                localStorage.setItem("token", token);
+                localStorage.setItem("token-init-date", new Date().getTime().toString());
 
-            //     dispatch(uiCloseProgressBackdrop());
-            // } else {
-            //     dispatch(uiCloseProgressBackdrop());
-            //     return console.log(msg);
-            // }
+                dispatch(authLogin(user));
+
+                dispatch(uiCloseProgressBackdrop());
+            } else {
+                dispatch(uiCloseProgressBackdrop());
+            }
         } catch (error) {
             dispatch(uiCloseProgressBackdrop());
             return console.log(error);
@@ -120,32 +114,16 @@ export const useAuthStore = () => {
         if (!localStorage.getItem("token")) return dispatch(authCheckingFinish());
 
         try {
-            const { data } = await socialMediaApi.get("auth/renew");
+            const { data: { user, token, msg }, status } = await socialMediaApi.get("auth/renew");
 
-            const {
-                msg,
-                token,
-                _id,
-                name: _name,
-                role: _role,
-                cart,
-                email: _email,
-                data: _data
-            } = data;
-
-            if (msg === "OK") {
+            if (status === 200) {
                 localStorage.setItem("token", token);
                 localStorage.setItem("token-init-date", new Date().getTime().toString());
 
-                // dispatch(
-                //     authLogin({
-                //         _id: _id,
-                //         name: _name,
-                //         email: _email,
-                //         role: _role,
-                //         data: (_data?.address) ? _data : null,
-                //     })
-                // );
+                dispatch(
+                    authLogin(user)
+                );
+
             } else {
                 if (msg === "invalid token.") {
                     const removeToken = new Promise((resolve, reject) => {
@@ -192,31 +170,21 @@ export const useAuthStore = () => {
 
     const startGoogleLogin = async (id_token: string) => {
         try {
-            // dispatch(uiOpenProgressBackdrop());
+            dispatch(uiOpenProgressBackdrop());
 
-            console.log(id_token)
 
-            // const { data } = await socialMediaApi.post("auth/google", { id_token });
+            const { data: { user, token }, status } = await socialMediaApi.post("auth/google", { id_token });
 
-            // const { msg, user, token } = data;
+            if (status === 200) {
+                localStorage.setItem("token", token);
+                localStorage.setItem("token-init-date", new Date().getTime().toString());
 
-            // if (msg === "OK") {
-            //     localStorage.setItem("token", token);
-            //     localStorage.setItem("token-init-date", new Date().getTime().toString());
+                dispatch(authLogin(user));
 
-            //     // dispatch(
-            //     //     authLogin({
-            //     //         _id: user._id,
-            //     //         name: user.name,
-            //     //         email: user.email,
-            //     //     })
-            //     // );
-
-            //     dispatch(uiCloseProgressBackdrop());
-            // } else {
-            //     dispatch(uiCloseProgressBackdrop());
-            //     return console.log(msg);
-            // }
+                dispatch(uiCloseProgressBackdrop());
+            } else {
+                dispatch(uiCloseProgressBackdrop());
+            }
         } catch (error) {
             dispatch(uiCloseProgressBackdrop());
             return console.log(error);

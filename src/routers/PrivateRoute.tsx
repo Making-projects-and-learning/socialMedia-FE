@@ -9,5 +9,5 @@ type AppProps = {
 
 export const PrivateRoute = ({ children, isAutenticated }: AppProps) => {
 
-    return isAutenticated ? children : <Navigate to="/" />
+    return isAutenticated ? children : <Navigate to="/login" />
 };

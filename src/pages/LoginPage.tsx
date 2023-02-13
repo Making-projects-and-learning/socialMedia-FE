@@ -144,13 +144,13 @@ export const LoginPage = (): JSX.Element => {
 
     const formik = useFormik({
         initialValues: {
-            email: "homelander@gmail.com",
-            password: "1234567",
+            username: "homelander",
+            password: "12345678",
         },
 
         validationSchema: YupLoginValidations,
-        onSubmit: async ({ email, password }, { resetForm }) => {
-            startLogin(email, password);
+        onSubmit: async ({ username, password }, { resetForm }) => {
+            startLogin(username, password);
             resetForm();
         },
     });
@@ -182,14 +182,14 @@ export const LoginPage = (): JSX.Element => {
                             fullWidth
                             variant="standard"
                             size="small"
-                            id="email"
-                            label="Email"
-                            name="email"
-                            autoComplete="email"
-                            value={formik.values.email}
+                            id="username"
+                            label="Username"
+                            name="username"
+                            autoComplete="username"
+                            value={formik.values.username}
                             onChange={formik.handleChange}
-                            error={formik.touched.email && Boolean(formik.errors.email)}
-                            helperText={formik.touched.email && formik.errors.email}
+                            error={formik.touched.username && Boolean(formik.errors.username)}
+                            helperText={formik.touched.username && formik.errors.username}
                         />
                         <TextField
                             fullWidth
