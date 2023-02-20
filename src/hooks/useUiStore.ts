@@ -2,42 +2,52 @@
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
 /** Store Type */
-import type { RootState, AppDispatch } from '../store'
+import type { RootState, AppDispatch } from "../store";
 
 /** Redux toolkit - Slices */
 import {
-    uiCloseProgressBackdrop,
-    uiOpenProgressBackdrop,
+  uiSetNewPostsAlert,
+  uiRemoveNewPostsAlert,
+  uiCloseProgressBackdrop,
+  uiOpenProgressBackdrop,
 } from "../store/slices/ui.slice";
 
-
 export const useUiStore = () => {
+  /** useDispatch setting */
+  const useAppDispatch: () => AppDispatch = useDispatch;
+  const dispatch = useAppDispatch();
 
-    /** useDispatch setting */
-    const useAppDispatch: () => AppDispatch = useDispatch
-    const dispatch = useAppDispatch()
+  /** useSelector setting */
+  const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+  const { progressBackdrop, newPostsAlert } = useAppSelector(
+    (state) => state.ui
+  );
 
-    /** useSelector setting */
-    const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
-    const { progressBackdrop } = useAppSelector((state) => state.ui);
+  const startUiSetNewPostsAlert = () => {
+    dispatch(uiSetNewPostsAlert());
+  };
 
-    const startUiOpenProgressBackdrop = () => {
+  const startUiRemoveNewPostsAlert = () => {
+    dispatch(uiRemoveNewPostsAlert());
+  };
 
-        dispatch(uiOpenProgressBackdrop());
-    };
+  const startUiOpenProgressBackdrop = () => {
+    dispatch(uiOpenProgressBackdrop());
+  };
 
-    const startUiCloseProgressBackdrop = () => {
+  const startUiCloseProgressBackdrop = () => {
+    dispatch(uiCloseProgressBackdrop());
+  };
 
-        dispatch(uiCloseProgressBackdrop());
-    };
+  return {
+    //* Propiedades
+    newPostsAlert,
+    progressBackdrop,
 
-
-    return {
-        //* Propiedades
-        progressBackdrop,
-
-        //* Métodos
-        startUiOpenProgressBackdrop,
-        startUiCloseProgressBackdrop,
-    };
+    //* Métodos
+    startUiSetNewPostsAlert,
+    startUiRemoveNewPostsAlert,
+    startUiOpenProgressBackdrop,
+    startUiCloseProgressBackdrop,
+  };
 };
