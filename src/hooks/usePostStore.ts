@@ -2,8 +2,12 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
+/** Api - Axios instance */
+import socialMediaApi from "../api/socialMediaApi";
+
 /** Store Type */
 import type { RootState, AppDispatch } from "../store";
+import { loadNewPost, loadPosts } from "../store/slices/post.slice";
 
 /** Utils */
 import { useSocket } from "./useSocket";
@@ -15,7 +19,7 @@ export const usePostStore = () => {
     socketEvents: { POST, NOTIFICATION },
   } = useSocket();
 
-  const { startUiSetNewPostsAlert } = useUiStore();
+  const { startUiSetNewPostsAlert, startUiRemoveNewPostsAlert } = useUiStore();
 
   /** useDispatch setting */
   const useAppDispatch: () => AppDispatch = useDispatch;
@@ -23,36 +27,62 @@ export const usePostStore = () => {
 
   /** useSelector setting */
   const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-  // const { progressBackdrop } = useAppSelector((state) => state.ui);
+  const { posts } = useAppSelector((state) => state.post);
 
   useEffect(() => {
-    /** New posts listener */
-    socket.on(NOTIFICATION.newPostsAvailable, () => {
-      startUiSetNewPostsAlert();
-      console.log("POST ALERT RECIVED");
-    });
+    if (socket) {
+      /** Create post listener */
+      socket.on(POST.create, (data) => {
+        dispatch(loadNewPost(data));
+        console.log("NEW POST LOADED");
+      });
 
-    return () => {
-      socket.off(NOTIFICATION.newPostsAvailable);
-    };
+      /** New posts listener */
+      socket.on(NOTIFICATION.newPostsAvailable, () => {
+        startUiSetNewPostsAlert();
+        console.log("NEW POSTS ALERT RECIVED");
+      });
+
+      return () => {
+        socket.off(POST.getAll);
+        socket.off(POST.create);
+        socket.off(NOTIFICATION.newPostsAvailable);
+        // socket.close();
+      };
+    }
   }, [socket]);
 
-  const SocketNewPost = () => {
+  const SocketNewPost = (description: string, image?: string | "") => {
     const post = {
-      title: "This is a publication",
-      description: "This is a description",
-      imageUrl:
-        "https://elcomercio.pe/resizer/t1bWYdftm9VT4LR_dhHYf1BALgg=/1200x900/smart/filters:format(jpeg):quality(75)/cloudfront-us-east-1.images.arcpublishing.com/elcomercio/Q2YSNNEAY5EVHPLCFI4NU4FQQA.jpg",
+      description: description,
+      imageUrl: image,
     };
 
     socket.emit(POST.create, post);
   };
 
+  const SocketLoadPosts = async () => {
+    try {
+      const {
+        data: { posts },
+        status,
+      } = await socialMediaApi.get("post");
+
+      if (status === 200) {
+        startUiRemoveNewPostsAlert();
+        dispatch(loadPosts(posts));
+      }
+    } catch (error) {
+      return console.log(error);
+    }
+  };
+
   return {
     /** Properties */
-    // progressBackdrop,
+    posts,
 
     /** Methods */
     SocketNewPost,
+    SocketLoadPosts,
   };
 };
