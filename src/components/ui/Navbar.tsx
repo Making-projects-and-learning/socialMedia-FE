@@ -17,7 +17,7 @@ const NavbarContainer = styled("div")(({ theme }) => ({
   height: "100%",
   //   margin: "5px",
   //   borderRadius: "15px",
-  border: "1px solid gray",
+  border: "1px solid #E9E9E9",
   display: "flex",
   flexDirection: "row",
   flexWrap: "wrap",

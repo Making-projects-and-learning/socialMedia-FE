@@ -11,6 +11,7 @@ export const useSocket = () => {
     auth: {
       token: localStorage.getItem("token"),
     },
+    multiplex: false,
   });
 
   const SocketConnect = () => {
