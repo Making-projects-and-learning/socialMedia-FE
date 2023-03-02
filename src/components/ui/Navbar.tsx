@@ -1,22 +1,12 @@
 /** Libraries */
-import { Link, useNavigate } from "react-router-dom";
-
-import { Grid, TextField, Typography, Button } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import Avatar from "@mui/material/Avatar";
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import Stack from "@mui/material/Stack";
-
 import { styled } from "@mui/material/styles";
 
-import { useFormik } from "formik";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
 /** Material UI - Custom components */
 const NavbarContainer = styled("div")(({ theme }) => ({
   width: "100%",
   height: "100%",
-  //   margin: "5px",
-  //   borderRadius: "15px",
   border: "1px solid #E9E9E9",
   display: "flex",
   flexDirection: "row",
@@ -30,8 +20,6 @@ const NavbarContainer = styled("div")(({ theme }) => ({
 const IconsContainer = styled("div")(({ theme }) => ({
   width: "5vw",
   height: "10%",
-  //   margin: "5px",
-  //   borderRadius: "15px",
   border: "none",
   display: "flex",
   flexDirection: "row",
