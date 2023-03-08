@@ -3,11 +3,10 @@ import { Navigate } from "react-router-dom";
 
 /** Types */
 type AppProps = {
-    children: JSX.Element;
-    isAutenticated: boolean;
+  children: JSX.Element;
+  isAuthenticated: boolean;
 };
 
-export const PublicRoute = ({ children, isAutenticated }: AppProps) => {
-
-    return !isAutenticated ? children : <Navigate to="/" />
+export const PublicRoute = ({ children, isAuthenticated }: AppProps) => {
+  return !isAuthenticated ? children : <Navigate to="/" />;
 };

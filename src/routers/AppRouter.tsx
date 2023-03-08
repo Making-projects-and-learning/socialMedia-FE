@@ -12,20 +12,14 @@ import { PublicRoute } from "./PublicRoute";
 import { HomePage, LoginPage } from "../pages";
 import { useAuthStore } from "../hooks";
 import { useEffect } from "react";
-
+import Register from "../pages/Register";
 
 export const AppRouter = (): JSX.Element => {
-
-  const {
-    _id,
-    checking,
-    startChecking,
-  } = useAuthStore();
+  const { _id, checking, startChecking } = useAuthStore();
 
   useEffect(() => {
     startChecking();
   }, []);
-
 
   if (checking) {
     return (
@@ -44,9 +38,7 @@ export const AppRouter = (): JSX.Element => {
 
   return (
     <BrowserRouter>
-
       <Routes>
-
         <Route
           path="/"
           element={
@@ -59,12 +51,20 @@ export const AppRouter = (): JSX.Element => {
         <Route
           path="login"
           element={
-            <PublicRoute isAutenticated={!!_id}>
+            <PublicRoute isAuthenticated={!!_id}>
               <LoginPage />
             </PublicRoute>
           }
         />
 
+        <Route
+          path="register"
+          element={
+            <PublicRoute isAuthenticated={!!_id}>
+              <Register />
+            </PublicRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
