@@ -1,23 +1,29 @@
 /** Libraries */
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { Button } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
-import TextareaAutosize from "@mui/material/TextareaAutosize";
 
 import { styled } from "@mui/material/styles";
 
 import { useFormik } from "formik";
 
 /** Utils */
-import { uploadImageToCloudinary, YupPostValidations } from "../../utils";
+import {
+  socketEvents,
+  uploadImageToCloudinary,
+  YupPostValidations,
+} from "../../utils";
 
 /** Custom hooks */
-import { usePostStore } from "../../hooks";
+import { useAuthStore, usePostStore, useUiStore } from "../../hooks";
+
+/** Interfaces */
+import { Post } from "../../interfaces/post.interface";
 
 /** Material UI - Custom components */
 const PostAreaContainer = styled("div")(({ theme }) => ({
@@ -68,19 +74,31 @@ const ItemsContainer = styled("div")(({ theme }) => ({
   alignItems: "center",
 }));
 
-const CustomTextArea = styled(TextareaAutosize)(({ theme }) => ({
+const CustomTextField = styled(TextField)(({ theme }) => ({
   height: "auto",
   width: "100%",
-  overflowY: "scroll",
-  padding: "10px",
-  marginBottom: "10px",
   border: "none",
   fontFamily: "Arial",
   fontSize: "18px",
   resize: "none",
 
+  "& .css-1d3z3hw-MuiOutlinedInput-notchedOutline": {
+    display: "none",
+  },
   ":focus-visible": {
     outline: "none",
+  },
+}));
+
+const ButtonAndCounterContainer = styled("div")(({ theme }) => ({
+  width: "35%",
+  display: "flex",
+  flexDirection: "row",
+  justifyContent: "flex-end",
+  gap: "20px",
+  alignItems: "center",
+  [theme.breakpoints.down("sm")]: {
+    width: "50%",
   },
 }));
 
@@ -102,8 +120,7 @@ const InputFile = styled("input")(({ theme }) => ({
 
 const ImageContainer = styled("div")(({ theme }) => ({
   width: "100%",
-  height: "95%",
-  minHeight: "25ch",
+  height: "auto",
   minWidth: "25ch",
   display: "flex",
   alignItems: "start",
@@ -119,13 +136,12 @@ const Image = styled("img")(({ theme }) => ({
   objectFit: "cover",
   objectPosition: "20% 10%",
   borderRadius: "15px",
-  border: "1px solid #E9E9E9",
 }));
 
 const CloseIconContainer = styled("div")(({ theme }) => ({
   position: "absolute",
-  width: "10%",
-  height: "10vh",
+  marginTop: "1.5%",
+  marginLeft: "1.5%",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -143,10 +159,141 @@ const CloseButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-export const PostCreateArea = (): JSX.Element => {
-  const { SocketNewPost, posts } = usePostStore();
+/** Types allowed to be charged on a post */
+const imageTypesAllowed = [
+  "image/jpg",
+  "image/jpeg",
+  "image/avif",
+  "image/png",
+  "image/webp",
+];
 
+const { POST } = socketEvents;
+
+export const PostCreateArea = (): JSX.Element => {
+  const {
+    socket,
+    socketRequests,
+    setCloseSocketLikeRequest,
+    setCloseSocketUnLikeRequest,
+    SocketNewPost,
+    LoadNewPost,
+    UpdatePost,
+    DeletePost,
+  } = usePostStore();
+
+  const { startUiOpenLikeNotification } = useUiStore();
+
+  const { _id, username } = useAuthStore();
+
+  /** The next code with useEffects is to validate if
+   * the like responde is comming from the server or not */
+
+  /** We are going to like or unlike a post from the client,
+   * but if we don't recive any response from the server that means
+   * that something goes wrong so we are going to go back with the
+   * like or unlike action on the post.
+   */
+
+  /** Like */
+  const estadoRef = useRef<boolean>();
+  useEffect(() => {
+    estadoRef.current = socketRequests.like.status;
+  }, [socketRequests.like.status]);
+  useEffect(() => {
+    let timer: number;
+    if (estadoRef.current) {
+      timer = setTimeout(() => {
+        /** If the server doesn't respond */
+        console.log("The response is not comming");
+        if (socketRequests.like.post) UpdatePost(socketRequests.like.post);
+        setCloseSocketLikeRequest();
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [estadoRef.current]);
+
+  /** UnLike */
+  const unLikeRef = useRef<boolean>();
+  useEffect(() => {
+    unLikeRef.current = socketRequests.unLike.status;
+  }, [socketRequests.unLike.status]);
+  useEffect(() => {
+    let timer: number;
+    if (unLikeRef.current) {
+      timer = setTimeout(() => {
+        /** If the server doesn't respond */
+        console.log("The response is not comming");
+        if (socketRequests.unLike.post) UpdatePost(socketRequests.unLike.post);
+        setCloseSocketUnLikeRequest();
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [unLikeRef.current]);
+
+  /** useEffects used as a listeners of events since this point */
+  /** Create post listener */
+  useEffect(() => {
+    if (socket) {
+      socket.on(POST.create, (data: Post) => {
+        LoadNewPost(data);
+        console.log("New post loaded!");
+      });
+    }
+
+    return () => {
+      socket.off(POST.create);
+    };
+  }, [socket]);
+
+  /** Delete post listener */
+  useEffect(() => {
+    socket.on(POST.delete, (data: Post) => {
+      console.log("POST DELETED");
+      DeletePost(data);
+    });
+
+    return () => {
+      socket.off(POST.delete);
+    };
+  }, [socket]);
+
+  /** Like a posts listener */
+  useEffect(() => {
+    if (socket) {
+      socket.on(
+        POST.like,
+        ({ postDB, user_name }: { postDB: Post; user_name: string }) => {
+          console.log("POST LIKED");
+          setCloseSocketLikeRequest();
+          if (postDB.owner._id === _id && user_name !== username) {
+            startUiOpenLikeNotification(user_name);
+          }
+        }
+      );
+    }
+    return () => {
+      socket.off(POST.like);
+    };
+  }, [socket]);
+
+  /** UnLike a posts listener */
+  useEffect(() => {
+    if (socket) {
+      socket.on(POST.unLike, (postDB: Post) => {
+        console.log("POST UNLIKED");
+        setCloseSocketUnLikeRequest();
+      });
+    }
+    return () => {
+      socket.off(POST.unLike);
+    };
+  }, [socket]);
+
+  /** Code totally related to this component since this point */
   const [file, setFile] = useState<string | null>(null);
+  const [isPostFocused, setIsPostFocused] = useState<boolean>(false);
+  const [submitChecking, setSubmitChecking] = useState<boolean>(false);
 
   const imageRef = useRef<HTMLInputElement>(null);
 
@@ -157,6 +304,7 @@ export const PostCreateArea = (): JSX.Element => {
 
     validationSchema: YupPostValidations,
     onSubmit: async ({ description }, { resetForm }) => {
+      setSubmitChecking(true);
       if (file) {
         const image = await uploadImageToCloudinary(file);
         SocketNewPost(description, image);
@@ -165,6 +313,7 @@ export const PostCreateArea = (): JSX.Element => {
       }
       setFile(null);
       resetForm();
+      setSubmitChecking(false);
     },
   });
 
@@ -178,8 +327,9 @@ export const PostCreateArea = (): JSX.Element => {
 
       reader.onload = () => {
         const base64 = reader.result as string;
-
-        return base64 ? setFile(base64) : setFile(null);
+        const type = base64.split(";")[0].split(":")[1];
+        if (imageTypesAllowed.includes(type))
+          return base64 ? setFile(base64) : setFile(null);
       };
     } else {
       setFile(null);
@@ -192,18 +342,27 @@ export const PostCreateArea = (): JSX.Element => {
         <Stack>
           <Avatar
             alt="Lucas Ojeda"
-            src="https://res.cloudinary.com/the-kings-company/image/upload/v1671396595/user-ecommerce/Avatar-Profile-PNG-Free-Image_yeonm0.png"
+            src="https://pbs.twimg.com/profile_images/1600166202218844162/wOaz3mlG_400x400.jpg"
+            /** Default avatar */
+            // src="https://res.cloudinary.com/the-kings-company/image/upload/v1671396595/user-ecommerce/Avatar-Profile-PNG-Free-Image_yeonm0.png"
           />
         </Stack>
       </AvatarContainer>
       <FormContainer onSubmit={formik.handleSubmit}>
-        <CustomTextArea
-          autoFocus
-          placeholder="What are you thinking about?"
+        <CustomTextField
+          multiline
+          variant="outlined"
           name="description"
           autoComplete="description"
+          placeholder="What are you thinking about?"
           value={formik.values.description}
           onChange={formik.handleChange}
+          onFocus={() => setIsPostFocused(true)}
+          onBlur={() => setIsPostFocused(false)}
+          error={
+            formik.touched.description && Boolean(formik.errors.description)
+          }
+          helperText={formik.touched.description && formik.errors.description}
         />
 
         <InputFile
@@ -233,9 +392,31 @@ export const PostCreateArea = (): JSX.Element => {
           >
             <ImageIcon color={!file ? "primary" : "disabled"} />
           </ImageIconButton>
-          <SubmitButton variant="contained" type="submit">
-            Post
-          </SubmitButton>
+          <ButtonAndCounterContainer>
+            <Typography
+              sx={{
+                visibility:
+                  isPostFocused || formik.values.description.length !== 0
+                    ? "visible"
+                    : "hidden",
+                fontSize: "14px",
+                color:
+                  formik.values.description.length > 264 ||
+                  formik.values.description.length < 6
+                    ? "red"
+                    : "green",
+              }}
+            >
+              {formik.values.description.length} / 264
+            </Typography>
+            <SubmitButton
+              disabled={submitChecking}
+              variant="contained"
+              type="submit"
+            >
+              Post
+            </SubmitButton>
+          </ButtonAndCounterContainer>
         </ItemsContainer>
       </FormContainer>
     </PostAreaContainer>

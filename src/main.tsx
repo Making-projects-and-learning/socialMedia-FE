@@ -21,11 +21,9 @@ import "./index.css";
 const { VITE_REACT_APP_GOOGLE_CLIENT_ID } = getEnvironmets();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <GoogleOAuthProvider clientId={VITE_REACT_APP_GOOGLE_CLIENT_ID!}>
-      <Provider store={store}>
-        <AppRouter />
-      </Provider>
-    </GoogleOAuthProvider>
-  </React.StrictMode>
+  <GoogleOAuthProvider clientId={VITE_REACT_APP_GOOGLE_CLIENT_ID!}>
+    <Provider store={store}>
+      <AppRouter />
+    </Provider>
+  </GoogleOAuthProvider>
 );

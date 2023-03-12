@@ -1,16 +1,23 @@
 /** Libraries */
-import React from "react";
+import React, { useState } from "react";
 
 import { Typography } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
-import TextareaAutosize from "@mui/material/TextareaAutosize";
 import IconButton from "@mui/material/IconButton";
 
+import DeleteIcon from "@mui/icons-material/Delete";
+import CommentIcon from "@mui/icons-material/Comment";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 import { styled } from "@mui/material/styles";
+
+/** Components */
+import { DeletePostModal } from "./DeletePostModal";
+
+/** Custom hooks */
+import { useAuthStore, usePostStore } from "../../hooks";
 
 /** Interfaces */
 import { User } from "../../interfaces/user.interface";
@@ -24,7 +31,12 @@ const PostContainer = styled("div")(({ theme }) => ({
   borderBottom: "1px solid #E9E9E9",
   display: "flex",
   flexDirection: "row",
-  backgroundColor: "#fff",
+
+  ":hover": {
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
+    transition: "0.3s ease-out all",
+    // transition: "opacity 0.3s ease-out 0s",
+  },
 }));
 
 const AvatarContainer = styled("div")(({ theme }) => ({
@@ -57,8 +69,25 @@ const SecondContainer = styled("form")(({ theme }) => ({
   margin: "15px",
   display: "flex",
   flexDirection: "column",
-  justifyContent: "center",
+  justifyContent: "space-between",
   alignItems: "center",
+}));
+
+const OptionsButtonContainer = styled("div")(({ theme }) => ({
+  width: "100%",
+  height: "5vh",
+  display: "flex",
+  justifyContent: "flex-end",
+  alignItems: "center",
+}));
+
+const DeleteIconbutton = styled(IconButton)(({ theme }) => ({
+  position: "relative",
+  right: "0",
+  top: "0",
+  ".MuiSvgIcon-root": {
+    fontSize: "25px",
+  },
 }));
 
 const ItemsContainer = styled("div")(({ theme }) => ({
@@ -69,13 +98,13 @@ const ItemsContainer = styled("div")(({ theme }) => ({
   marginBottom: "10px",
   borderTop: "1px solid #E9E9E9",
   display: "flex",
-  justifyContent: "flex-end",
+  justifyContent: "flex-start",
   alignItems: "center",
 }));
 
 const DescriptionContainer = styled("div")(({ theme }) => ({
-  height: "auto",
-  minHeight: "5vh",
+  // height: "auto",
+  minHeight: "10vh",
   width: "100%",
   overflowY: "visible",
   padding: "10px",
@@ -84,15 +113,10 @@ const DescriptionContainer = styled("div")(({ theme }) => ({
   border: "none",
   fontFamily: "Arial",
   fontSize: "18px",
-  resize: "none",
   display: "flex",
   flexDirection: "column",
-  justifyContent: "flex-start",
+  justifyContent: "space-between",
   alignItems: "start",
-
-  ":focus-visible": {
-    outline: "none",
-  },
 }));
 
 const ImageContainer = styled("div")(({ theme }) => ({
@@ -117,6 +141,18 @@ const Image = styled("img")(({ theme }) => ({
   border: "1px solid #E9E9E9",
 }));
 
+const CommentIconButton = styled(IconButton)(({ theme }) => ({
+  ".MuiSvgIcon-root": {
+    fontSize: "25px",
+  },
+}));
+
+const CommentFont = styled(Typography)(({ theme }) => ({
+  color: "rgb(83, 100, 113)",
+  fontWeight: 700,
+  fontSize: "18px",
+}));
+
 const LikeIconButton = styled(IconButton)(({ theme }) => ({
   ".MuiSvgIcon-root": {
     fontSize: "25px",
@@ -131,17 +167,39 @@ const UsernameFont = styled(Typography)(({ theme }) => ({
   color: "rgb(15, 20, 25)",
   fontWeight: 700,
   fontSize: "20px",
+  marginTop: "-3.5vh",
+  marginLeft: "-0.5vw",
+  marginBottom: "5vh",
+  [theme.breakpoints.down("sm")]: {
+    marginTop: "-4vh",
+    marginLeft: "2vw",
+  },
 }));
 
 const DescriptionFont = styled(Typography)(({ theme }) => ({
   // color: "rgb(249, 24, 128)",
 }));
 
+const FavoriteIconQuantityFont = styled(Typography)(({ theme }) => ({
+  color: "rgb(249, 24, 128)",
+  fontWeight: 700,
+  fontSize: "18px",
+}));
+
+const BorderIconQuantityFont = styled(Typography)(({ theme }) => ({
+  color: "rgb(83, 100, 113)",
+  fontWeight: 700,
+  fontSize: "18px",
+}));
+
+/** Component props */
 interface Props {
   description: string;
   imageUrl: string;
   owner: User;
-  likedBy: User[];
+  likedBy: string[];
+  post_id: string;
+  createdAt: Date;
 }
 
 export const Post: React.FC<Props> = ({
@@ -149,9 +207,38 @@ export const Post: React.FC<Props> = ({
   imageUrl,
   owner,
   likedBy,
+  post_id,
+  createdAt,
 }) => {
+  const { _id } = useAuthStore();
+  const { SocketLikeAPost, SocketUnLikeAPost } = usePostStore();
+
+  const [openModal, setOpenModal] = useState<boolean>(false);
+
+  const currentPost = {
+    _id: post_id,
+    description,
+    imageUrl,
+    owner,
+    likedBy,
+    createdAt,
+  };
+
+  const handleLike = () => {
+    SocketLikeAPost(currentPost);
+  };
+
+  const handleUnLike = () => {
+    SocketUnLikeAPost(currentPost);
+  };
+
   return (
     <PostContainer>
+      <DeletePostModal
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        post_id={post_id}
+      />
       <AvatarContainer>
         <Stack>
           <Avatar
@@ -161,6 +248,13 @@ export const Post: React.FC<Props> = ({
         </Stack>
       </AvatarContainer>
       <SecondContainer>
+        <OptionsButtonContainer>
+          {_id === owner._id && (
+            <DeleteIconbutton onClick={() => setOpenModal(true)}>
+              <DeleteIcon />
+            </DeleteIconbutton>
+          )}
+        </OptionsButtonContainer>
         <DescriptionContainer>
           <UsernameFont>{owner.username}</UsernameFont>
           <DescriptionFont>{description}</DescriptionFont>
@@ -172,9 +266,29 @@ export const Post: React.FC<Props> = ({
         )}
 
         <ItemsContainer>
-          <LikeIconButton>
-            {!likedBy ? <CustomFavoriteIcon /> : <FavoriteBorderIcon />}
-          </LikeIconButton>
+          <>
+            <CommentIconButton>
+              <CommentIcon />
+            </CommentIconButton>
+            <CommentFont>{0}</CommentFont>
+          </>
+          {likedBy.includes(_id) ? (
+            <>
+              <LikeIconButton onClick={handleUnLike}>
+                <CustomFavoriteIcon />
+              </LikeIconButton>
+              <FavoriteIconQuantityFont>
+                {likedBy.length}
+              </FavoriteIconQuantityFont>
+            </>
+          ) : (
+            <>
+              <LikeIconButton onClick={handleLike}>
+                <FavoriteBorderIcon />
+              </LikeIconButton>
+              <BorderIconQuantityFont>{likedBy.length}</BorderIconQuantityFont>
+            </>
+          )}
         </ItemsContainer>
       </SecondContainer>
     </PostContainer>

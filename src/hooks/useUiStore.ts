@@ -1,7 +1,7 @@
 /** Libraries */
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
-/** Store Type */
+/** Store */
 import type { RootState, AppDispatch } from "../store";
 
 /** Redux toolkit - Slices */
@@ -10,6 +10,8 @@ import {
   uiRemoveNewPostsAlert,
   uiCloseProgressBackdrop,
   uiOpenProgressBackdrop,
+  uiOpenLikeNotification,
+  uiCloseLikeNotification,
 } from "../store/slices/ui.slice";
 
 export const useUiStore = () => {
@@ -19,10 +21,20 @@ export const useUiStore = () => {
 
   /** useSelector setting */
   const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-  const { progressBackdrop, newPostsAlert } = useAppSelector(
+  const { progressBackdrop, newPostsAlert, likeNotification } = useAppSelector(
     (state) => state.ui
   );
 
+  /** Notifications */
+  const startUiOpenLikeNotification = (owner_name: string) => {
+    dispatch(uiOpenLikeNotification(owner_name));
+  };
+
+  const startUiCloseLikeNotification = () => {
+    dispatch(uiCloseLikeNotification());
+  };
+
+  /** New posts available alert */
   const startUiSetNewPostsAlert = () => {
     dispatch(uiSetNewPostsAlert());
   };
@@ -31,6 +43,7 @@ export const useUiStore = () => {
     dispatch(uiRemoveNewPostsAlert());
   };
 
+  /** Loader with the backdrop */
   const startUiOpenProgressBackdrop = () => {
     dispatch(uiOpenProgressBackdrop());
   };
@@ -43,8 +56,11 @@ export const useUiStore = () => {
     //* Propiedades
     newPostsAlert,
     progressBackdrop,
+    likeNotification,
 
     //* Métodos
+    startUiOpenLikeNotification,
+    startUiCloseLikeNotification,
     startUiSetNewPostsAlert,
     startUiRemoveNewPostsAlert,
     startUiOpenProgressBackdrop,

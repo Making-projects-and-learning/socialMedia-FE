@@ -1,5 +1,5 @@
 /** Libraries */
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 /** Interface */
 import { UiState } from "../../interfaces/slices/uiSlice.interface";
@@ -12,8 +12,27 @@ export const uiSlice = createSlice({
       status: false,
       quantity: 0,
     },
+    likeNotification: {
+      status: false,
+      user: "",
+    },
   } as UiState,
   reducers: {
+    /** Like notification */
+    uiOpenLikeNotification: (state, action: PayloadAction<string>) => {
+      state.likeNotification = {
+        status: true,
+        user: action.payload,
+      };
+    },
+    uiCloseLikeNotification: (state) => {
+      state.likeNotification = {
+        status: false,
+        user: "",
+      };
+    },
+
+    /** New posts available alert */
     uiSetNewPostsAlert: (state) => {
       state.newPostsAlert = {
         status: true,
@@ -26,12 +45,16 @@ export const uiSlice = createSlice({
         quantity: 0,
       };
     },
+
+    /** Loader with progress backdrop */
     uiOpenProgressBackdrop: (state) => {
       state.progressBackdrop = true;
     },
     uiCloseProgressBackdrop: (state) => {
       state.progressBackdrop = false;
     },
+
+    /** Logout */
     uiLogout: (state) => {
       state.progressBackdrop = false;
     },
@@ -39,6 +62,8 @@ export const uiSlice = createSlice({
 });
 
 export const {
+  uiOpenLikeNotification,
+  uiCloseLikeNotification,
   uiSetNewPostsAlert,
   uiRemoveNewPostsAlert,
   uiOpenProgressBackdrop,
