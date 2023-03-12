@@ -1,21 +1,18 @@
 /** Libraries */
-import { Link, useNavigate } from "react-router-dom";
+import { memo } from "react";
 
-import { Grid, TextField, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 
 import { styled } from "@mui/material/styles";
-
-import { useFormik } from "formik";
 
 /** Components */
 import { NewPostsButton, PostCreateArea } from "../components";
 import { Navbar } from "../components/ui/Navbar";
 
 /** Custom hooks */
-import { useAuthStore, usePostStore, useSocket, useUiStore } from "../hooks";
+import { usePostStore } from "../hooks";
 
 /** Utils */
-import { YupLoginValidations } from "../utils";
 import { Post } from "../components/posts/Post";
 
 /** Material UI - Custom components */
@@ -105,7 +102,7 @@ const ChatsSectionContainer = styled("div")(({ theme }) => ({
   },
 }));
 
-export const HomePage = (): JSX.Element => {
+export const HomePage: React.FC = memo(() => {
   const { posts } = usePostStore();
 
   return (
@@ -123,13 +120,15 @@ export const HomePage = (): JSX.Element => {
         <NewPostsButton />
         {posts.length >= 1 && (
           <>
-            {posts.map((e) => (
+            {posts.map((e, i) => (
               <Post
                 key={e._id}
                 description={e.description}
                 owner={e.owner}
                 imageUrl={e.imageUrl}
                 likedBy={e.likedBy}
+                post_id={e._id}
+                createdAt={e.createdAt}
               />
             ))}
           </>
@@ -140,4 +139,4 @@ export const HomePage = (): JSX.Element => {
       </ChatsSectionContainer>
     </HomeContainer>
   );
-};
+});

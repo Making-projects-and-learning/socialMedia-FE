@@ -9,6 +9,6 @@ export interface Post {
   description: string;
   imageUrl: string;
   owner: User;
-  likedBy: User[];
+  likedBy: string[];
   createdAt: Date;
 }

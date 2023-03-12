@@ -6,7 +6,7 @@ import { googleLogout } from "@react-oauth/google";
 /** API */
 import socialMediaApi from "../api/socialMediaApi";
 
-/** Store Type */
+/** Store */
 import type { RootState, AppDispatch } from "../store";
 
 /** Redux toolkit - Slices */
@@ -25,7 +25,7 @@ import {
 import { usePostStore } from "./usePostStore";
 
 export const useAuthStore = () => {
-  const { SocketLoadPosts } = usePostStore();
+  const { startLoadPosts } = usePostStore();
 
   /** useDispatch setting */
   const useAppDispatch: () => AppDispatch = useDispatch;
@@ -56,7 +56,7 @@ export const useAuthStore = () => {
         data: { token, user },
         status,
       } = await socialMediaApi.post("auth/login", { username, password });
-
+      console.log(status);
       if (status === 200) {
         localStorage.setItem("token", token);
         localStorage.setItem(
@@ -64,7 +64,7 @@ export const useAuthStore = () => {
           new Date().getTime().toString()
         );
 
-        SocketLoadPosts();
+        startLoadPosts();
         dispatch(authLogin(user));
 
         dispatch(uiCloseProgressBackdrop());
@@ -136,7 +136,7 @@ export const useAuthStore = () => {
           new Date().getTime().toString()
         );
 
-        SocketLoadPosts();
+        startLoadPosts();
         dispatch(authLogin(user));
       } else {
         if (msg === "invalid token.") {
@@ -198,6 +198,7 @@ export const useAuthStore = () => {
           new Date().getTime().toString()
         );
 
+        startLoadPosts();
         dispatch(authLogin(user));
 
         dispatch(uiCloseProgressBackdrop());
