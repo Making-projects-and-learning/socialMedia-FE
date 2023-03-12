@@ -17,6 +17,7 @@ import { LikeNotification } from "../components/ui/LikeNotification";
 
 /** Custom hooks */
 import { useAuthStore } from "../hooks";
+import { PostPage } from "../pages/PostPage";
 
 export const AppRouter = (): JSX.Element => {
   const { _id, checking, startChecking } = useAuthStore();
@@ -70,6 +71,15 @@ export const AppRouter = (): JSX.Element => {
           element={
             <PrivateRoute isAutenticated={!!_id}>
               <HomePage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/post/:id"
+          element={
+            <PrivateRoute isAutenticated={!!_id}>
+              <PostPage />
             </PrivateRoute>
           }
         />

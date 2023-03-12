@@ -31,21 +31,11 @@ const IconsContainer = styled("div")(({ theme }) => ({
 export const Navbar = (): JSX.Element => {
   return (
     <NavbarContainer>
-      <IconsContainer>
-        <PhotoCameraIcon />
-      </IconsContainer>
-      <IconsContainer>
-        <PhotoCameraIcon />
-      </IconsContainer>
-      <IconsContainer>
-        <PhotoCameraIcon />
-      </IconsContainer>
-      <IconsContainer>
-        <PhotoCameraIcon />
-      </IconsContainer>
-      <IconsContainer>
-        <PhotoCameraIcon />
-      </IconsContainer>
+      <IconsContainer>{/* <PhotoCameraIcon /> */}</IconsContainer>
+      <IconsContainer>{/* <PhotoCameraIcon /> */}</IconsContainer>
+      <IconsContainer>{/* <PhotoCameraIcon /> */}</IconsContainer>
+      <IconsContainer>{/* <PhotoCameraIcon /> */}</IconsContainer>
+      <IconsContainer>{/* <PhotoCameraIcon /> */}</IconsContainer>
     </NavbarContainer>
   );
 };
