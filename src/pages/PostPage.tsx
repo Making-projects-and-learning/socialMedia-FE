@@ -14,14 +14,14 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { styled } from "@mui/material/styles";
 
 /** Components */
-import { DeletePostModal } from "./DeletePostModal";
+import { DeletePostModal } from "../components";
 
 /** Custom hooks */
-import { useAuthStore, usePostStore } from "../../hooks";
+import { useAuthStore, usePostStore } from "../hooks";
 
 /** Interfaces */
-import { User } from "../../interfaces/user.interface";
-import { useNavigate } from "react-router-dom";
+import { User } from "../interfaces/user.interface";
+import { useParams } from "react-router-dom";
 
 /** Material UI - Custom components */
 const PostContainer = styled("div")(({ theme }) => ({
@@ -194,38 +194,41 @@ const BorderIconQuantityFont = styled(Typography)(({ theme }) => ({
 }));
 
 /** Component props */
-interface Props {
-  description: string;
-  imageUrl: string;
-  owner: User;
-  likedBy: string[];
-  post_id: string;
-  createdAt: Date;
-}
+// interface Props {
+//   description: string;
+//   imageUrl: string;
+//   owner: User;
+//   likedBy: string[];
+//   post_id: string;
+//   createdAt: Date;
+// }
 
-export const Post: React.FC<Props> = ({
-  description,
-  imageUrl,
-  owner,
-  likedBy,
-  post_id,
-  createdAt,
-}) => {
-  const navigate = useNavigate();
-
+export const PostPage = (): JSX.Element => {
+  // export const PostPage: React.FC<Props> = ({
+  //   description,
+  //   imageUrl,
+  //   owner,
+  //   likedBy,
+  //   post_id,
+  //   createdAt,
+  // }) => {
+  const { id } = useParams();
   const { _id } = useAuthStore();
-  const { SocketLikeAPost, SocketUnLikeAPost } = usePostStore();
+  const { SocketLikeAPost, SocketUnLikeAPost, posts } = usePostStore();
 
   const [openModal, setOpenModal] = useState<boolean>(false);
+  if (posts.length === 0) return <h1>Loading...</h1>;
 
-  const currentPost = {
-    _id: post_id,
+  const currentPost = posts.filter((e) => e._id === id)[0];
+
+  const {
     description,
     imageUrl,
     owner,
     likedBy,
     createdAt,
-  };
+    _id: post_id,
+  } = currentPost;
 
   const handleLike = () => {
     SocketLikeAPost(currentPost);
@@ -270,7 +273,7 @@ export const Post: React.FC<Props> = ({
 
         <ItemsContainer>
           <>
-            <CommentIconButton onClick={() => navigate(`post/${post_id}`)}>
+            <CommentIconButton>
               <CommentIcon />
             </CommentIconButton>
             <CommentFont>{0}</CommentFont>

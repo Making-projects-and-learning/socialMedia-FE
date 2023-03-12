@@ -65,7 +65,8 @@ export const AppRouter = (): JSX.Element => {
   return (
     <BrowserRouter>
       <LikeNotification />
-      <Route
+      <Routes>
+        <Route
           path="/"
           element={
             <PrivateRoute isAutenticated={!!_id}>
