@@ -11,13 +11,13 @@ import { PublicRoute } from "./PublicRoute";
 
 /** Pages */
 import { HomePage, LoginPage } from "../pages";
+import Register from "../pages/Register";
 
 /** Components */
 import { LikeNotification } from "../components/ui/LikeNotification";
 
 /** Custom hooks */
 import { useAuthStore } from "../hooks";
-import { PostPage } from "../pages/PostPage";
 
 export const AppRouter = (): JSX.Element => {
   const { _id, checking, startChecking } = useAuthStore();
@@ -76,19 +76,19 @@ export const AppRouter = (): JSX.Element => {
         />
 
         <Route
-          path="/post/:id"
+          path="login"
           element={
-            <PrivateRoute isAutenticated={!!_id}>
-              <PostPage />
-            </PrivateRoute>
+            <PublicRoute isAuthenticated={!!_id}>
+              <LoginPage />
+            </PublicRoute>
           }
         />
 
         <Route
-          path="login"
+          path="register"
           element={
-            <PublicRoute isAutenticated={!!_id}>
-              <LoginPage />
+            <PublicRoute isAuthenticated={!!_id}>
+              <Register />
             </PublicRoute>
           }
         />
