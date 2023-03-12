@@ -11,6 +11,7 @@ import { PublicRoute } from "./PublicRoute";
 
 /** Pages */
 import { HomePage, LoginPage } from "../pages";
+import Register from "../pages/Register";
 
 /** Components */
 import { LikeNotification } from "../components/ui/LikeNotification";
@@ -64,8 +65,7 @@ export const AppRouter = (): JSX.Element => {
   return (
     <BrowserRouter>
       <LikeNotification />
-      <Routes>
-        <Route
+      <Route
           path="/"
           element={
             <PrivateRoute isAutenticated={!!_id}>
@@ -77,8 +77,17 @@ export const AppRouter = (): JSX.Element => {
         <Route
           path="login"
           element={
-            <PublicRoute isAutenticated={!!_id}>
+            <PublicRoute isAuthenticated={!!_id}>
               <LoginPage />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="register"
+          element={
+            <PublicRoute isAuthenticated={!!_id}>
+              <Register />
             </PublicRoute>
           }
         />

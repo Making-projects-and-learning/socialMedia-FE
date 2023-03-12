@@ -10,13 +10,6 @@ export const YupLoginValidations = Yup.object({
     .required("El campo es requerido"),
 });
 
-export const YupPostValidations = Yup.object({
-  description: Yup.string()
-    .min(6, "Description should have at least 6 characters.")
-    .max(264, "Description must have not more than 264 characters.")
-    .required("Field required"),
-});
-
 // export const YupRegisterValidations = Yup.object({
 //   name: Yup.string()
 //     .max(15, 'Debe tener 15 caracteres o menos')
@@ -28,3 +21,18 @@ export const YupPostValidations = Yup.object({
 //     .min(6, 'La contraseña debe tener al menos 6 caracteres')
 //     .required('El campo es requerido'),
 // });
+
+export const YupRegisterValidations = Yup.object({
+  name: Yup.string()
+    .required("Name is required")
+    .min(5, "Name should be at least 5 characters long"),
+  email: Yup.string()
+    .required("Email is required")
+    .email("Invalid email address please make sure to correct it"),
+  password: Yup.string()
+    .required("Password is required")
+    .min(8, "password should be at least 8 characters long"),
+  repeated_password: Yup.string()
+    .required("this field is required")
+    .oneOf(["password"], "Password should match"),
+});
