@@ -4,12 +4,14 @@ import axios, { type AxiosHeaders, type AxiosInstance } from "axios";
 /** Utils */
 import { getEnvironmets } from "../utils";
 
-const { VITE_REACT_APP_API_URL } = getEnvironmets();
+const { VITE_API_URL } = getEnvironmets();
 
 const socialMediaApi: AxiosInstance = axios.create({
-  baseURL: VITE_REACT_APP_API_URL,
+  baseURL: `${VITE_API_URL}/api`,
   headers: {
     Accept: "application/json",
+    "Access-Control-Allow-Origin": `${VITE_API_URL}`,
+    "Access-Control-Allow-Credentials": true,
   },
 });
 
