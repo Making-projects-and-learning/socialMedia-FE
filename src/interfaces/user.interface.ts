@@ -10,6 +10,7 @@ export interface User {
   name: string;
   username: string;
   email: string;
+  picture: string;
   password: string;
   description: string;
   posts: Post[];
@@ -17,5 +18,6 @@ export interface User {
   groups: Room[];
   individualRooms: Room[];
   likedPosts: Post[];
+  commentedPosts?: Comment[];
   online: boolean;
 }
