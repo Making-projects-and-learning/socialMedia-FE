@@ -9,15 +9,13 @@ import type { RootState, AppDispatch } from "../store";
 
 /** Redux toolkit - Slices */
 import {
-  closeSocketLikeRequest,
-  closeSocketUnLikeRequest,
   deletePost,
   loadAllNewPosts,
   loadNewPost,
   loadNewRecivedPost,
   loadPosts,
-  openSocketLikeRequest,
-  openSocketUnLikeRequest,
+  setCounterLimitStore,
+  setCounterSkipStore,
   updatePost,
 } from "../store/slices/post.slice";
 import {
@@ -26,16 +24,16 @@ import {
 } from "../store/slices/ui.slice";
 
 /** Utils */
-import { socketEvents } from "../utils";
+import { socketEvents } from "../sockets";
 
 /** Interfaces */
-import { Post } from "../interfaces/post.interface";
+import { Comment, Post } from "../interfaces/post.interface";
 import { AuthState } from "../interfaces/slices/authSlice.interface";
 import { PostState } from "../interfaces/slices/postSlice.interface";
 
 /** Socket Instance */
-import { getSocketInstance } from "../utils/socketInstance";
-const socket = getSocketInstance();
+// import { getSocketInstance } from "../sockets";
+// const socket = getSocketInstance();
 
 /** Socket Events */
 const { POST } = socketEvents;
@@ -50,40 +48,19 @@ export const usePostStore = () => {
   const {
     posts,
     counter: { skip, limit },
-    socketRequests,
   } = useAppSelector((state: { post: PostState }) => state.post);
   const { _id } = useAppSelector((state: { auth: AuthState }) => state.auth);
+  const { socket } = useAppSelector((state) => state.socket);
 
-  /** Socket requests handler */
-  /** Like */
-  const setCloseSocketLikeRequest = () => {
-    dispatch(closeSocketLikeRequest());
+  /** Counter */
+  const startSetCounterSkipStore = (newSkip: number) => {
+    dispatch(setCounterSkipStore(newSkip));
+  };
+  const startSetCounterLimitStore = (newLimit: number) => {
+    dispatch(setCounterLimitStore(newLimit));
   };
 
-  /** UnLike */
-  const setCloseSocketUnLikeRequest = () => {
-    dispatch(closeSocketUnLikeRequest());
-  };
-
-  /** Normal Posts */
-  const startLoadPosts = async () => {
-    try {
-      const {
-        data: { posts },
-        status,
-      } = await socialMediaApi.get(`post?skip=${skip}&limit=${limit}`);
-
-      if (status === 200) {
-        console.log(skip, limit);
-        console.log(posts);
-        dispatch(uiRemoveNewPostsAlert());
-        dispatch(loadPosts(posts));
-      }
-    } catch (error) {
-      return console.log(error);
-    }
-  };
-
+  /** Only storage managment */
   const LoadNewPost = (post: Post) => {
     dispatch(loadNewPost(post));
   };
@@ -96,6 +73,41 @@ export const usePostStore = () => {
     dispatch(deletePost(post));
   };
 
+  // New Posts Recived
+  const LoadNewRecivedPost = (post: Post) => {
+    dispatch(loadNewRecivedPost(post));
+  };
+
+  const LoadAllNewPosts = () => {
+    dispatch(loadAllNewPosts());
+    dispatch(uiRemoveNewPostsAlert());
+  };
+
+  /** Normal Posts - Api call */
+  const startLoadPosts = async (customSkip?: number) => {
+    let skipToSend: number;
+    if (customSkip && customSkip > skip) {
+      skipToSend = customSkip;
+      dispatch(setCounterSkipStore(customSkip));
+    } else {
+      skipToSend = skip;
+    }
+    try {
+      const {
+        data: { posts },
+        status,
+      } = await socialMediaApi.get(`post?skip=${skipToSend}&limit=${limit}`);
+
+      if (status === 200) {
+        dispatch(uiRemoveNewPostsAlert());
+        dispatch(loadPosts(posts));
+      }
+    } catch (error) {
+      return console.log(error);
+    }
+  };
+
+  /** Since this point all sockets emit */
   const SocketNewPost = (description: string, image?: string | "") => {
     if (socket) {
       const post = {
@@ -114,65 +126,84 @@ export const usePostStore = () => {
     }
   };
 
-  /** New Posts Recived */
-  const LoadNewRecivedPost = (post: Post) => {
-    dispatch(loadNewRecivedPost(post));
-  };
-
-  const LoadAllNewPosts = () => {
-    dispatch(loadAllNewPosts());
-    dispatch(uiRemoveNewPostsAlert());
-  };
-
   /** Likes */
   const SocketLikeAPost = (post: Post) => {
     if (socket) {
-      dispatch(
-        updatePost({
-          ...post,
-          likedBy: [...post.likedBy, _id.toString()],
-        })
-      );
-      dispatch(openSocketLikeRequest(post));
       socket.emit(POST.like, post._id);
     }
   };
 
   const SocketUnLikeAPost = (post: Post) => {
     if (socket) {
-      dispatch(
-        updatePost({
-          ...post,
-          likedBy: post.likedBy.filter((e) => e.toString() !== _id.toString()),
-        })
-      );
-      dispatch(openSocketUnLikeRequest(post));
       socket.emit(POST.unLike, post._id);
+    }
+  };
+
+  /** Comments */
+  const SocketCreateComment = (
+    comment_id: string,
+    comment: Partial<Comment>
+  ) => {
+    if (socket) {
+      const commentData = {
+        ...comment,
+        createdAt: new Date(),
+      };
+
+      socket.emit(POST.createComment, comment_id, commentData);
+    }
+  };
+
+  const SocketDeleteComment = (comment_id: string) => {
+    if (socket) {
+      socket.emit(POST.deleteComment, comment_id);
+    }
+  };
+
+  /** Likes */
+  const SocketLikeAComment = (comment: Comment) => {
+    if (socket) {
+      socket.emit(POST.likeComment, comment._id);
+    }
+  };
+
+  const SocketUnLikeAComment = (comment: Comment) => {
+    if (socket) {
+      socket.emit(POST.unLikeComment, comment._id);
     }
   };
 
   return {
     /** Properties */
     posts,
-    socket,
-    socketRequests,
+    // socket,
+    skip,
+    limit,
 
     /** Methods */
-    /** Socket requests handler */
-    setCloseSocketLikeRequest,
-    setCloseSocketUnLikeRequest,
-    /** Normal posts */
-    startLoadPosts,
-    SocketNewPost,
+    /** Counter */
+    startSetCounterSkipStore,
+    startSetCounterLimitStore,
+    /** Only storage managment */
     LoadNewPost,
     UpdatePost,
-    SocketDeletePost,
     DeletePost,
-    /** New posts recived */
+    // New Posts Recived
     LoadNewRecivedPost,
     LoadAllNewPosts,
+    /** Normal Posts - Api call */
+    startLoadPosts,
+    /** Since this point all sockets emit */
+    SocketNewPost,
+    SocketDeletePost,
     /** Likes */
     SocketLikeAPost,
     SocketUnLikeAPost,
+    /** Comments */
+    SocketCreateComment,
+    SocketDeleteComment,
+    /** Likes */
+    SocketLikeAComment,
+    SocketUnLikeAComment,
   };
 };

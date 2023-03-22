@@ -104,7 +104,12 @@ const Register = () => {
   );
 
   const renderLink = () => (
-    <Grid container justifyContent="flex-end" marginTop="20px">
+    <Grid
+      container
+      justifyContent="flex-end"
+      marginTop="20px"
+      marginRight="20px"
+    >
       <Grid item>
         <AuthLink to="/login">Already has an account Sign up</AuthLink>
       </Grid>

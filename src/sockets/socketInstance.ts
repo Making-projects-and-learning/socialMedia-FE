@@ -5,7 +5,7 @@ import { io, type Socket } from "socket.io-client";
 import { socketEvents } from "./socketEvents";
 
 /** Utils */
-import { getEnvironmets } from "./getEnvironmets";
+import { getEnvironmets } from "../utils";
 
 const { VITE_API_URL } = getEnvironmets();
 

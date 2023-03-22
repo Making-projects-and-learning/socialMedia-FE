@@ -7,7 +7,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 
 /** Custom hooks */
-import { useUiStore } from "../../hooks";
+import { useUiStore } from "../../../hooks";
 
 export const LikeNotification: React.FC = () => {
   const { likeNotification, startUiCloseLikeNotification } = useUiStore();

@@ -23,6 +23,8 @@ import {
 
 /** Custom hooks */
 import { usePostStore } from "./usePostStore";
+import { setSocket } from "../store/slices/socket.slice";
+import { postsLogout } from "../store/slices/post.slice";
 
 export const useAuthStore = () => {
   const { startLoadPosts } = usePostStore();
@@ -39,6 +41,7 @@ export const useAuthStore = () => {
     name,
     username,
     email,
+    picture,
     description,
     posts,
     friends,
@@ -47,6 +50,7 @@ export const useAuthStore = () => {
     likedPosts,
     online,
   } = useAppSelector((state) => state.auth);
+  const { socket } = useAppSelector((state) => state.socket);
 
   const startLogin = async (username: string, password: string) => {
     try {
@@ -160,28 +164,6 @@ export const useAuthStore = () => {
     }
   };
 
-  const startLogout = () => {
-    try {
-      dispatch(uiOpenProgressBackdrop());
-
-      localStorage.removeItem("token-init-date");
-      localStorage.removeItem("token");
-
-      dispatch(authLogout());
-      googleLogout();
-
-      setTimeout(() => {
-        dispatch(uiCloseProgressBackdrop());
-      }, 1500);
-    } catch (error) {
-      console.log(error);
-
-      setTimeout(() => {
-        dispatch(uiCloseProgressBackdrop());
-      }, 1500);
-    }
-  };
-
   const startGoogleLogin = async (id_token: string) => {
     try {
       dispatch(uiOpenProgressBackdrop());
@@ -211,6 +193,33 @@ export const useAuthStore = () => {
     }
   };
 
+  const startLogout = () => {
+    try {
+      dispatch(uiOpenProgressBackdrop());
+
+      localStorage.removeItem("token-init-date");
+      localStorage.removeItem("token");
+
+      dispatch(authLogout());
+      googleLogout();
+
+      dispatch(postsLogout());
+
+      if (socket) socket.disconnect();
+      dispatch(setSocket(null));
+
+      setTimeout(() => {
+        dispatch(uiCloseProgressBackdrop());
+      }, 1500);
+    } catch (error) {
+      console.log(error);
+
+      setTimeout(() => {
+        dispatch(uiCloseProgressBackdrop());
+      }, 1500);
+    }
+  };
+
   return {
     //* Propiedades
     checking,
@@ -218,6 +227,7 @@ export const useAuthStore = () => {
     name,
     username,
     email,
+    picture,
     description,
     posts,
     friends,

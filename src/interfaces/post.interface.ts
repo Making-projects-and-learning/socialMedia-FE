@@ -9,6 +9,16 @@ export interface Post {
   description: string;
   imageUrl: string;
   owner: User;
-  likedBy: string[];
+  likedBy?: MongoId[];
+  comments?: Comment[];
+  createdAt: Date;
+}
+
+export interface Comment {
+  _id: MongoId;
+  content: string;
+  imageUrl: string;
+  owner: User;
+  likedBy?: MongoId[];
   createdAt: Date;
 }
