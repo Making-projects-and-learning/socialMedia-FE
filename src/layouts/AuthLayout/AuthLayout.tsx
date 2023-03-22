@@ -25,14 +25,14 @@ const AuthWrapperContainer = styled(Box)(({ theme }) => ({
 }));
 
 const AuthFormContainer = styled(Box)(({ theme }) => ({
-  width: "55%",
+  width: "50%",
   height: "95%",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   overflow: "hidden",
   [theme.breakpoints.down("md")]: {
-    width: "95%",
+    width: "75%",
   },
 }));
 
@@ -47,7 +47,7 @@ const AuthTitleContainer = styled(Box)(({ theme }) => ({
 
 const ImageContainer = styled(Box)(({ theme }) => ({
   height: "95%",
-  width: "40%",
+  width: "50%",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -55,7 +55,7 @@ const ImageContainer = styled(Box)(({ theme }) => ({
   overflow: "hidden",
   border: "none",
   paddingRight: "15px",
-  [theme.breakpoints.down("md")]: {
+  [theme.breakpoints.down("sm")]: {
     display: "none",
   },
 }));
@@ -65,6 +65,7 @@ const Image = styled("img")(({ theme }) => ({
   height: "100%",
   objectFit: "cover",
   objectPosition: "20% 10%",
+  borderRadius: "5px",
   [theme.breakpoints.down("md")]: {
     maxWidth: "100%",
     maxHeight: "100%",
