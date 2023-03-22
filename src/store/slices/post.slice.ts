@@ -12,16 +12,6 @@ export const postSlice = createSlice({
       skip: 0,
       limit: 10,
     },
-    socketRequests: {
-      like: {
-        status: false,
-        post: null,
-      },
-      unLike: {
-        status: false,
-        post: null,
-      },
-    },
     posts: [],
     recivedPosts: [],
   } as PostState,
@@ -40,50 +30,9 @@ export const postSlice = createSlice({
       };
     },
 
-    /** Socket requests handler */
-    /** Like */
-    openSocketLikeRequest: (state, action: PayloadAction<Post>) => {
-      state.socketRequests = {
-        ...state.socketRequests,
-        like: {
-          status: true,
-          post: action.payload,
-        },
-      };
-    },
-    closeSocketLikeRequest: (state) => {
-      state.socketRequests = {
-        ...state.socketRequests,
-        like: {
-          status: false,
-          post: null,
-        },
-      };
-    },
-
-    /** unLike */
-    openSocketUnLikeRequest: (state, action: PayloadAction<Post>) => {
-      state.socketRequests = {
-        ...state.socketRequests,
-        unLike: {
-          status: true,
-          post: action.payload,
-        },
-      };
-    },
-    closeSocketUnLikeRequest: (state) => {
-      state.socketRequests = {
-        ...state.socketRequests,
-        unLike: {
-          status: false,
-          post: null,
-        },
-      };
-    },
-
     /** Normal posts */
     loadPosts: (state, action: PayloadAction<Post[]>) => {
-      state.posts = [...action.payload];
+      state.posts = [...state.posts, ...action.payload];
     },
     loadNewPost: (state, action: PayloadAction<Post>) => {
       state.posts = [action.payload, ...state.posts];
@@ -109,6 +58,10 @@ export const postSlice = createSlice({
 
     /** Both */
     postsLogout: (state) => {
+      state.counter = {
+        skip: 0,
+        limit: 10,
+      };
       state.posts = [];
       state.recivedPosts = [];
     },
@@ -119,11 +72,6 @@ export const {
   /** Counter */
   setCounterSkipStore,
   setCounterLimitStore,
-  /** Socket requests handler */
-  openSocketLikeRequest,
-  closeSocketLikeRequest,
-  openSocketUnLikeRequest,
-  closeSocketUnLikeRequest,
   /** Normal posts */
   loadPosts,
   loadNewPost,
