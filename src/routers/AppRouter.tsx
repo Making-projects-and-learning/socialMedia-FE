@@ -10,39 +10,27 @@ import { PrivateRoute } from "./PrivateRoute";
 import { PublicRoute } from "./PublicRoute";
 
 /** Pages */
-import { HomePage, LoginPage } from "../pages";
+import { Home, Login, Post } from "../pages";
 import Register from "../pages/Register";
 
 /** Components */
-import { LikeNotification } from "../components/ui/LikeNotification";
+import { LikeNotification } from "../components/ui/LikeNotification/LikeNotification";
 
 /** Custom hooks */
+import useSocket from "../hooks/useSocket";
 import { useAuthStore } from "../hooks";
 
+/** Sockets */
+import { socketListeners } from "../sockets";
+
 export const AppRouter = (): JSX.Element => {
+  /** Socket initialization */
+  useSocket();
+  /** Socket listeners */
+  socketListeners();
+
   const { _id, checking, startChecking } = useAuthStore();
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  /** This is to implement the functionality of
-   * load products when the user cames until the
-   * bottom of the page.
-   */
-  window.addEventListener("scroll", function () {
-    if (
-      window.scrollY + window.innerHeight >=
-      document.documentElement.scrollHeight
-    ) {
-      miFuncion();
-    }
-  });
-
-  function miFuncion() {
-    if (isLoading) {
-      console.log("We are at the bottom");
-      setIsLoading(false);
-    }
-  }
   useEffect(() => {
     startChecking();
   }, []);
@@ -70,7 +58,16 @@ export const AppRouter = (): JSX.Element => {
           path="/"
           element={
             <PrivateRoute isAutenticated={!!_id}>
-              <HomePage />
+              <Home />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/post/:id"
+          element={
+            <PrivateRoute isAutenticated={!!_id}>
+              <Post />
             </PrivateRoute>
           }
         />
@@ -79,7 +76,7 @@ export const AppRouter = (): JSX.Element => {
           path="login"
           element={
             <PublicRoute isAuthenticated={!!_id}>
-              <LoginPage />
+              <Login />
             </PublicRoute>
           }
         />
