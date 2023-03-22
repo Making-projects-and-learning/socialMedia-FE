@@ -5,6 +5,10 @@ interface POST {
   delete: string;
   like: string;
   unLike: string;
+  createComment: string;
+  deleteComment: string;
+  likeComment: string;
+  unLikeComment: string;
 }
 
 interface NOTIFICATION {
@@ -32,6 +36,10 @@ export const socketEvents: SocketEvents = {
     delete: "POST_DELETE",
     like: "POST_LIKE",
     unLike: "POST_UNLIKE",
+    createComment: "POST_CREATE_COMMENT",
+    deleteComment: "POST_DELETE_COMMENT",
+    likeComment: "COMMENT_LIKE",
+    unLikeComment: "COMMENT_UNLIKE",
   },
   NOTIFICATION: {
     newPostsAvailable: "NEW_POSTS_ARE_AVAILABLE",
