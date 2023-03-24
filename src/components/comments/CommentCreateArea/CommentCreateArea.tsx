@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
+import Swal from "sweetalert2";
+
 import { Typography } from "@mui/material";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -99,8 +101,18 @@ export const CommentCreateArea: React.FC<Props> = ({ inputCommentArea }) => {
       reader.onload = () => {
         const base64 = reader.result as string;
         const type = base64.split(";")[0].split(":")[1];
-        if (imageTypesAllowed.includes(type))
+        if (imageTypesAllowed.includes(type)) {
           return base64 ? setFile(base64) : setFile(null);
+        } else {
+          Swal.fire({
+            position: "center",
+            icon: "warning",
+            title: `Allowed extensions only`,
+            text: `jpg | jpeg | avif | png | webp`,
+            showConfirmButton: true,
+            timer: 6000,
+          });
+        }
       };
     } else {
       setFile(null);

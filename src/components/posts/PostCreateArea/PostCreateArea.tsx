@@ -1,6 +1,8 @@
 /** Libraries */
 import { useEffect, useRef, useState } from "react";
 
+import Swal from "sweetalert2";
+
 import { Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
@@ -84,8 +86,18 @@ export const PostCreateArea = (): JSX.Element => {
       reader.onload = () => {
         const base64 = reader.result as string;
         const type = base64.split(";")[0].split(":")[1];
-        if (imageTypesAllowed.includes(type))
+        if (imageTypesAllowed.includes(type)) {
           return base64 ? setFile(base64) : setFile(null);
+        } else {
+          Swal.fire({
+            position: "center",
+            icon: "warning",
+            title: `Allowed extensions only`,
+            text: `jpg | jpeg | avif | png | webp`,
+            showConfirmButton: true,
+            timer: 6000,
+          });
+        }
       };
     } else {
       setFile(null);

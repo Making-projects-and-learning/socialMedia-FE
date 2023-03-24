@@ -1,6 +1,8 @@
 /** Libraries */
-import { useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+
+import Swal from "sweetalert2";
 
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
@@ -11,8 +13,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CommentIcon from "@mui/icons-material/Comment";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
+import moment from "moment";
+
 /** Components */
-import { CommentCreateArea, DeletePostModal } from "../../components";
+import { CommentCreateArea } from "../../components";
 
 /** Custom hooks */
 import { useAuthStore, usePostStore } from "../../hooks";
@@ -24,8 +28,8 @@ import AppLayout from "../../layouts/AppLayout";
 import {
   PostContainer,
   AvatarContainer,
+  AvatarAndNameContainer,
   SecondContainer,
-  OptionsButtonContainer,
   DeleteIconbutton,
   ItemsContainer,
   DescriptionContainer,
@@ -36,6 +40,8 @@ import {
   LikeIconButton,
   CustomFavoriteIcon,
   UsernameFont,
+  Dot,
+  DateFont,
   DescriptionFont,
   FavoriteIconQuantityFont,
   BorderIconQuantityFont,
@@ -43,19 +49,29 @@ import {
 import { Comment } from "../../components/comments/Comment/Comment";
 
 export const Post = (): JSX.Element => {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { id } = useParams();
 
   const { _id } = useAuthStore();
-  const { SocketLikeAPost, SocketUnLikeAPost, posts } = usePostStore();
+  const { SocketLikeAPost, SocketUnLikeAPost, SocketDeletePost, posts } =
+    usePostStore();
 
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  if (posts.length === 0) return <h1></h1>;
-
+  /** Input focus ref */
   const inputCommentArea = useRef<HTMLInputElement>(null);
 
-  const currentPost = posts.filter((e) => e._id === id)[0];
+  const [isLiked, setIsLiked] = useState<boolean>(false);
 
-  // console.log(currentPost);
+  /** Get current post data */
+  const currentPost = posts?.filter((e) => e._id === id)[0] ?? {
+    description: "",
+    imageUrl: "",
+    owner: "",
+    likedBy: [],
+    createdAt: "",
+    comments: [],
+    _id: "",
+  };
 
   const {
     description,
@@ -67,6 +83,16 @@ export const Post = (): JSX.Element => {
     _id: post_id,
   } = currentPost;
 
+  useEffect(() => {
+    if (likedBy) {
+      const user = likedBy.find((user) => user._id === _id);
+      user ? setIsLiked(true) : setIsLiked(false);
+    }
+  }, [likedBy]);
+
+  if (!currentPost._id) return <></>;
+
+  /** Handle functions */
   const handleLike = () => {
     SocketLikeAPost(currentPost);
   };
@@ -81,32 +107,38 @@ export const Post = (): JSX.Element => {
     }
   };
 
-  const renderPostModal = () => (
-    <DeletePostModal
-      openModal={openModal}
-      setOpenModal={setOpenModal}
-      post_id={post_id}
-    />
-  );
+  const handleDelete = () => {
+    Swal.fire({
+      position: "center",
+      title: "Are you sure you want to delete this post",
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (pathname.split("/")[1] === "post") navigate("/");
+        SocketDeletePost(post_id);
+      }
+    });
+  };
 
+  /** Render component functions */
   const renderAvatar = () => (
     <AvatarContainer>
-      <Stack>
-        <Avatar alt="Lucas Ojeda" src={postOwner.picture} />
-      </Stack>
+      <AvatarAndNameContainer>
+        <Stack>
+          <Avatar alt="Lucas Ojeda" src={postOwner.picture} />
+        </Stack>
+        <UsernameFont>{postOwner.username}</UsernameFont>
+      </AvatarAndNameContainer>
+
+      {_id === postOwner._id && (
+        <Tooltip title="Delete post" arrow>
+          <DeleteIconbutton onClick={handleDelete}>
+            <DeleteIcon />
+          </DeleteIconbutton>
+        </Tooltip>
+      )}
     </AvatarContainer>
-  );
-
-  const renderOptionsButton = () => (
-    <Tooltip title="Delete post" arrow>
-      <DeleteIconbutton onClick={() => setOpenModal(true)}>
-        <DeleteIcon />
-      </DeleteIconbutton>
-    </Tooltip>
-  );
-
-  const renderUsername = () => (
-    <UsernameFont>{postOwner.username}</UsernameFont>
   );
 
   const renderDescription = () => (
@@ -122,20 +154,18 @@ export const Post = (): JSX.Element => {
           <CommentIcon />
         </CommentIconButton>
       </Tooltip>
-      <CommentFont>{comments?.length}</CommentFont>
     </>
   );
 
   const renderLikeButton = () => (
     <>
-      {likedBy?.includes(_id) ? (
+      {isLiked ? (
         <>
           <Tooltip title="Unlike" arrow>
             <LikeIconButton onClick={handleUnLike}>
               <CustomFavoriteIcon />
             </LikeIconButton>
           </Tooltip>
-          <FavoriteIconQuantityFont>{likedBy.length}</FavoriteIconQuantityFont>
         </>
       ) : (
         <>
@@ -144,9 +174,6 @@ export const Post = (): JSX.Element => {
               <FavoriteBorderIcon />
             </LikeIconButton>
           </Tooltip>
-          <BorderIconQuantityFont>
-            {likedBy ? likedBy.length : 0}
-          </BorderIconQuantityFont>
         </>
       )}
     </>
@@ -161,6 +188,7 @@ export const Post = (): JSX.Element => {
             key={e._id}
             content={e.content}
             owner={e.owner}
+            post={e.post}
             imageUrl={e.imageUrl}
             likedBy={e.likedBy}
             comment_id={e._id}
@@ -174,18 +202,23 @@ export const Post = (): JSX.Element => {
     <AppLayout>
       <>
         <PostContainer>
-          {renderPostModal()}
           {renderAvatar()}
           <SecondContainer>
-            <OptionsButtonContainer>
-              {_id === postOwner._id && renderOptionsButton()}
-            </OptionsButtonContainer>
-            <DescriptionContainer>
-              {renderUsername()}
-              {renderDescription()}
-            </DescriptionContainer>
-            {imageUrl && <ImageContainer>{renderImage()}</ImageContainer>}
+            <DescriptionContainer>{renderDescription()}</DescriptionContainer>
 
+            {imageUrl && <ImageContainer>{renderImage()}</ImageContainer>}
+            <DateFont>
+              {moment(createdAt).format("h:mm A · DD MMM YYYY")}
+            </DateFont>
+            <ItemsContainer sx={{ gap: "0.5vw" }}>
+              <CommentFont>
+                <strong>{comments?.length}</strong> comments
+              </CommentFont>
+              <Dot>·</Dot>
+              <CommentFont>
+                <strong>{likedBy?.length}</strong> likes
+              </CommentFont>
+            </ItemsContainer>
             <ItemsContainer>
               {renderCommentButton()}
               {renderLikeButton()}

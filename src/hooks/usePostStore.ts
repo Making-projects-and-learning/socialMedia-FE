@@ -27,13 +27,9 @@ import {
 import { socketEvents } from "../sockets";
 
 /** Interfaces */
-import { Comment, Post } from "../interfaces/post.interface";
+import { Comment, NonPopulatedPost, Post } from "../interfaces/post.interface";
 import { AuthState } from "../interfaces/slices/authSlice.interface";
 import { PostState } from "../interfaces/slices/postSlice.interface";
-
-/** Socket Instance */
-// import { getSocketInstance } from "../sockets";
-// const socket = getSocketInstance();
 
 /** Socket Events */
 const { POST } = socketEvents;
@@ -68,8 +64,7 @@ export const usePostStore = () => {
   const UpdatePost = (post: Post) => {
     dispatch(updatePost(post));
   };
-
-  const DeletePost = (post: Post) => {
+  const DeletePost = (post: NonPopulatedPost) => {
     dispatch(deletePost(post));
   };
 
@@ -96,9 +91,11 @@ export const usePostStore = () => {
       const {
         data: { posts },
         status,
-      } = await socialMediaApi.get(`post?skip=${skipToSend}&limit=${limit}`);
+      }: { data: { posts: Post[] }; status: number } = await socialMediaApi.get(
+        `post?skip=${skipToSend}&limit=${limit}`
+      );
 
-      if (status === 200) {
+      if (status === 200 && posts) {
         dispatch(uiRemoveNewPostsAlert());
         dispatch(loadPosts(posts));
       }
@@ -127,13 +124,13 @@ export const usePostStore = () => {
   };
 
   /** Likes */
-  const SocketLikeAPost = (post: Post) => {
+  const SocketLikeAPost = (post: Partial<Post>) => {
     if (socket) {
       socket.emit(POST.like, post._id);
     }
   };
 
-  const SocketUnLikeAPost = (post: Post) => {
+  const SocketUnLikeAPost = (post: Partial<Post>) => {
     if (socket) {
       socket.emit(POST.unLike, post._id);
     }

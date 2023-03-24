@@ -1,5 +1,5 @@
 /** Interfaces */
-import { Post } from "./post.interface";
+import { Comment, Post } from "./post.interface";
 import { Room } from "./room.interface";
 
 /** Types */
@@ -12,12 +12,33 @@ export interface User {
   email: string;
   picture: string;
   password: string;
-  description: string;
-  posts: Post[];
-  friends: User[];
-  groups: Room[];
-  individualRooms: Room[];
-  likedPosts: Post[];
-  commentedPosts?: Comment[];
+  description?: string;
+  friends?: User[];
+  groups?: Room[];
+  individualRooms?: Room[];
+  posts?: Post[];
+  likedPosts?: Post[];
+  comments?: Comment[];
+  likedComments?: Comment[];
   online: boolean;
+}
+
+export interface NonPopulatedUser
+  extends Omit<
+    User,
+    | "friends"
+    | "groups"
+    | "individualRooms"
+    | "posts"
+    | "likedPosts"
+    | "comments"
+    | "likedComments"
+  > {
+  friends?: string[];
+  groups?: string[];
+  individualRooms?: string[];
+  posts?: string[];
+  likedPosts?: string[];
+  comments?: string[];
+  likedComments?: string[];
 }

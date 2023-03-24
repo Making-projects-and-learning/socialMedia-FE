@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Socket } from "socket.io-client";
+import { type Socket } from "socket.io-client";
 
 interface SocketState {
   socket: Socket | null;
@@ -12,10 +12,13 @@ export const socketSlice = createSlice({
   } as SocketState,
   reducers: {
     setSocket(state, action: PayloadAction<Socket | null>) {
-      state.socket =
-        (state.socket === null || state.socket === false) && action.payload;
+      // @ts-ignore
+      state.socket = state.socket === null && action.payload;
+    },
+    socketLogout(state) {
+      state.socket = null;
     },
   },
 });
 
-export const { setSocket } = socketSlice.actions;
+export const { setSocket, socketLogout } = socketSlice.actions;
