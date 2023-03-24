@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import Swal from "sweetalert2";
+
 import { styled } from "@mui/material/styles";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -41,17 +43,36 @@ export const MenuNavbar = (): JSX.Element => {
   };
 
   const handleAccount = () => {
-    console.log("Go to account");
+    Swal.fire({
+      position: "center",
+      icon: "info",
+      title: `This page is in process!`,
+      showConfirmButton: true,
+      timer: 6000,
+    });
     handleMenu();
   };
 
   const handleMessages = () => {
-    console.log("Go to messages");
+    Swal.fire({
+      position: "center",
+      icon: "info",
+      title: `This page is in process!`,
+      showConfirmButton: true,
+      timer: 6000,
+    });
     handleMenu();
   };
 
   const handleLogout = () => {
-    startLogout();
+    Swal.fire({
+      position: "center",
+      title: "Are you sure you want to logout?",
+      showCancelButton: true,
+      confirmButtonText: "Logout",
+    }).then((result) => {
+      if (result.isConfirmed) startLogout();
+    });
     handleMenu();
   };
 

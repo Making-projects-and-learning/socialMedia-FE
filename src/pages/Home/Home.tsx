@@ -23,6 +23,7 @@ import {
   LoaderContainer,
   TitleContainer,
 } from "./styled";
+import { Post as PostInterface } from "../../interfaces/post.interface";
 
 export const Home: React.FC = memo(() => {
   const { posts, startLoadPosts, skip } = usePostStore();
@@ -34,6 +35,11 @@ export const Home: React.FC = memo(() => {
   const arrPostLength = posts.length.toString().split("");
   const isTenMultiple = Number(arrPostLength[arrPostLength.length - 1]) === 0;
 
+  console.log(`###################`);
+  console.log(`isIntersecting: ${isIntersecting}`);
+  console.log(`skip: ${skip}`);
+  console.log(`isTenMultiple: ${isTenMultiple}`);
+  console.log(`posts.length: ${posts.length}`);
   useEffect(() => {
     if (
       posts.length >= 10 &&
@@ -75,9 +81,10 @@ export const Home: React.FC = memo(() => {
     );
 
   const renderPosts = () =>
-    posts.length >= 1 && (
+    posts &&
+    posts.length !== 0 && (
       <>
-        {posts.map((e, i) => (
+        {posts.map((e: PostInterface, i: number) => (
           <Post
             key={e._id}
             description={e.description}

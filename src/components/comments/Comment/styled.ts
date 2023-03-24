@@ -13,41 +13,45 @@ export const PostContainer = styled("div")(({ theme }) => ({
   paddingTop: "1.5vh",
   borderBottom: "1px solid #E9E9E9",
   display: "flex",
-  flexDirection: "row",
+  flexDirection: "column",
+  alignItems: "end",
 
   ":hover": {
     backgroundColor: "rgba(0, 0, 0, 0.03)",
     transition: "0.3s ease-out all",
-    // transition: "opacity 0.3s ease-out 0s",
   },
 }));
 
 export const AvatarContainer = styled("div")(({ theme }) => ({
-  width: "10%",
-  minHeight: "25vh",
+  width: "100%",
+  minHeight: "5vh",
   height: "max-content",
-  paddingTop: "2.5vw",
-  paddingLeft: "1vw",
+  paddingRight: "1vw",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  "& .MuiAvatar-root": {
+    height: "35px",
+    width: "35px",
+  },
+}));
+
+export const AvatarAndNameContainer = styled("div")(({ theme }) => ({
+  width: "80%",
+  height: "100%",
+  paddingLeft: "0.5vw",
   display: "flex",
   justifyContent: "flex-start",
-  alignItems: "start",
-  "& .MuiAvatar-root": {
-    height: "40px",
-    width: "40px",
-  },
-  [theme.breakpoints.down("md")]: {
-    paddingTop: "3vw",
-    paddingLeft: "2.5vw",
-  },
+  alignItems: "center",
   [theme.breakpoints.down("sm")]: {
-    paddingTop: "5vw",
+    width: "90%",
     paddingLeft: "2.5vw",
   },
 }));
 
 export const SecondContainer = styled("form")(({ theme }) => ({
   width: "90%",
-  minHeight: "20vh",
+  minHeight: "10vh",
   height: "100%",
   margin: "15px",
   display: "flex",
@@ -90,7 +94,7 @@ export const ItemsContainer = styled("div")(({ theme }) => ({
 
 export const DescriptionContainer = styled("div")(({ theme }) => ({
   // height: "auto",
-  minHeight: "10vh",
+  minHeight: "5vh",
   width: "100%",
   overflowY: "visible",
   padding: "10px",
@@ -101,7 +105,7 @@ export const DescriptionContainer = styled("div")(({ theme }) => ({
   fontSize: "18px",
   display: "flex",
   flexDirection: "column",
-  justifyContent: "space-between",
+  justifyContent: "flex-end",
   alignItems: "start",
 }));
 
@@ -149,17 +153,31 @@ export const CustomFavoriteIcon = styled(FavoriteIcon)(({ theme }) => ({
   color: "rgb(249, 24, 128)",
 }));
 
+export const UsernameContainer = styled("div")(({ theme }) => ({
+  width: "100%",
+  display: "flex",
+  justifyContent: "flex-start",
+  alignItems: "center",
+  gap: "1%",
+}));
+
 export const UsernameFont = styled(Typography)(({ theme }) => ({
   color: "rgb(15, 20, 25)",
   fontWeight: 700,
   fontSize: "20px",
-  marginTop: "-3.5vh",
-  marginLeft: "-0.5vw",
-  marginBottom: "5vh",
-  [theme.breakpoints.down("sm")]: {
-    marginTop: "-4vh",
-    marginLeft: "2vw",
-  },
+  marginLeft: "1vw",
+}));
+
+export const Dot = styled(Typography)(({ theme }) => ({
+  color: "gray",
+  textAlign: "center",
+  fontSize: "20px",
+}));
+
+export const DateFont = styled(Typography)(({ theme }) => ({
+  color: "gray",
+  textAlign: "center",
+  fontSize: "14px",
 }));
 
 export const DescriptionFont = styled(Typography)(({ theme }) => ({

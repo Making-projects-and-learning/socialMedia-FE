@@ -3,6 +3,10 @@ import { useEffect } from "react";
 
 import { useSelector, TypedUseSelectorHook } from "react-redux";
 
+import Swal from "sweetalert2";
+
+import { closeSnackbar, useSnackbar } from "notistack";
+
 /** Store */
 import { RootState } from "../../store";
 
@@ -13,7 +17,7 @@ import { useUiStore, usePostStore } from "../../hooks";
 import { socketEvents } from "../../sockets";
 
 /** Interfaces */
-import { Post } from "../../interfaces/post.interface";
+import { NonPopulatedPost, Post } from "../../interfaces/post.interface";
 
 const { POST } = socketEvents;
 
@@ -22,6 +26,8 @@ export const postListeners = () => {
   const { LoadNewPost, UpdatePost, DeletePost } = usePostStore();
 
   const { startUiOpenLikeNotification } = useUiStore();
+
+  const { enqueueSnackbar } = useSnackbar();
 
   const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
   const { socket } = useAppSelector((state) => state.socket);
@@ -46,9 +52,18 @@ export const postListeners = () => {
   /** Delete post listener */
   useEffect(() => {
     if (socket) {
-      socket.on(POST.delete, (data: Post) => {
+      socket.on(POST.delete, (postDB: NonPopulatedPost) => {
         console.log("POST DELETED");
-        DeletePost(data);
+        DeletePost(postDB);
+        if (postDB.owner === _id) {
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            text: `Post deleted!`,
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        }
       });
     }
 
@@ -70,7 +85,12 @@ export const postListeners = () => {
           UpdatePost(postDB);
           if (_id && username) {
             if (postDB.owner._id === _id && user_name !== username) {
-              startUiOpenLikeNotification(user_name);
+              enqueueSnackbar(`${user_name} likes your post!`, {
+                variant: "likedPost",
+                autoHideDuration: 6000,
+                // @ts-ignore
+                postId: postDB._id.toString(),
+              });
             }
           }
         }

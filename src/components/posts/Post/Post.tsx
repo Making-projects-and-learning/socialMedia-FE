@@ -1,6 +1,8 @@
 /** Libraries */
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
+import Swal from "sweetalert2";
 
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
@@ -11,8 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CommentIcon from "@mui/icons-material/Comment";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
-/** Components */
-import { DeletePostModal } from "../DeletePostModal/DeletePostModal";
+import moment from "moment";
 
 /** Custom hooks */
 import { useAuthStore, usePostStore } from "../../../hooks";
@@ -25,6 +26,7 @@ import { User } from "../../../interfaces/user.interface";
 import {
   PostContainer,
   AvatarContainer,
+  AvatarAndNameContainer,
   SecondContainer,
   OptionsButtonContainer,
   DeleteIconbutton,
@@ -37,6 +39,9 @@ import {
   LikeIconButton,
   CustomFavoriteIcon,
   UsernameFont,
+  UsernameContainer,
+  Dot,
+  DateFont,
   DescriptionFont,
   FavoriteIconQuantityFont,
   BorderIconQuantityFont,
@@ -47,7 +52,7 @@ interface Props {
   description: string;
   imageUrl: string;
   owner: User;
-  likedBy?: string[];
+  likedBy?: User[];
   comments?: Comment[];
   post_id: string;
   createdAt: Date;
@@ -62,12 +67,14 @@ export const Post: React.FC<Props> = ({
   comments,
   createdAt,
 }) => {
+  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   const { _id, picture } = useAuthStore();
-  const { SocketLikeAPost, SocketUnLikeAPost } = usePostStore();
+  const { SocketLikeAPost, SocketUnLikeAPost, SocketDeletePost } =
+    usePostStore();
 
-  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
 
   const currentPost = {
     _id: post_id,
@@ -78,45 +85,76 @@ export const Post: React.FC<Props> = ({
     createdAt,
   };
 
-  const handleLike = () => {
+  useEffect(() => {
+    if (likedBy) {
+      const user = likedBy.find((user) => user._id === _id);
+      user ? setIsLiked(true) : setIsLiked(false);
+    }
+  }, [likedBy]);
+
+  /** Handle functions */
+  const handleLike = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
     SocketLikeAPost(currentPost);
   };
 
-  const handleUnLike = () => {
+  const handleUnLike = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
     SocketUnLikeAPost(currentPost);
   };
 
-  const renderPostModal = () => (
-    <DeletePostModal
-      openModal={openModal}
-      setOpenModal={setOpenModal}
-      post_id={post_id}
-    />
-  );
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
 
+    Swal.fire({
+      position: "center",
+      title: "Are you sure you want to delete this post",
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (pathname.split("/")[1] === "post") navigate("/");
+        SocketDeletePost(post_id);
+      }
+    });
+  };
+
+  const handleGoToPost = () => {
+    navigate(`/post/${post_id}`);
+    window.scroll(0, 0);
+  };
+
+  /** Render component functions */
   const renderAvatar = () => (
     <AvatarContainer>
-      <Stack>
-        <Avatar alt="Lucas Ojeda" src={owner.picture} />
-      </Stack>
+      <AvatarAndNameContainer>
+        <Stack>
+          <Avatar alt="Lucas Ojeda" src={owner.picture} />
+        </Stack>
+        <UsernameContainer>
+          <UsernameFont>{owner.username}</UsernameFont>
+          <Dot>·</Dot>
+          <DateFont>{moment(createdAt).fromNow()}</DateFont>
+        </UsernameContainer>
+      </AvatarAndNameContainer>
+
+      {_id === owner._id && (
+        <Tooltip title="Delete post" arrow>
+          <DeleteIconbutton
+            id="deleteButton"
+            sx={{
+              visibility: "hidden",
+            }}
+            onClick={handleDelete}
+          >
+            <DeleteIcon />
+          </DeleteIconbutton>
+        </Tooltip>
+      )}
     </AvatarContainer>
   );
-
-  const renderOptionsButton = () => (
-    <Tooltip title="Delete post" arrow>
-      <DeleteIconbutton
-        id="deleteButton"
-        onClick={() => setOpenModal(true)}
-        sx={{
-          visibility: "hidden",
-        }}
-      >
-        <DeleteIcon />
-      </DeleteIconbutton>
-    </Tooltip>
-  );
-
-  const renderUsername = () => <UsernameFont>{owner?.username}</UsernameFont>;
 
   const renderDescription = () => (
     <DescriptionFont>{description}</DescriptionFont>
@@ -127,7 +165,7 @@ export const Post: React.FC<Props> = ({
   const renderCommentButton = () => (
     <>
       <Tooltip title="Go to comments section" arrow>
-        <CommentIconButton onClick={() => navigate(`post/${post_id}`)}>
+        <CommentIconButton onClick={handleGoToPost}>
           <CommentIcon />
         </CommentIconButton>
       </Tooltip>
@@ -137,7 +175,7 @@ export const Post: React.FC<Props> = ({
 
   const renderLikeButton = () => (
     <>
-      {likedBy?.includes(_id) ? (
+      {isLiked ? (
         <>
           <Tooltip title="Unlike" arrow>
             <LikeIconButton onClick={handleUnLike}>
@@ -168,17 +206,12 @@ export const Post: React.FC<Props> = ({
           },
         },
       }}
+      onClick={handleGoToPost}
     >
-      {renderPostModal()}
       {renderAvatar()}
       <SecondContainer>
-        <OptionsButtonContainer>
-          {_id === owner?._id && renderOptionsButton()}
-        </OptionsButtonContainer>
-        <DescriptionContainer>
-          {renderUsername()}
-          {renderDescription()}
-        </DescriptionContainer>
+        <DescriptionContainer>{renderDescription()}</DescriptionContainer>
+
         {imageUrl && <ImageContainer>{renderImage()}</ImageContainer>}
 
         <ItemsContainer>
