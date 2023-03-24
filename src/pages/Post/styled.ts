@@ -14,44 +14,45 @@ export const PostContainer = styled("div")(({ theme }) => ({
   paddingTop: "1.5vh",
   borderBottom: "1px solid #E9E9E9",
   display: "flex",
-  flexDirection: "row",
-
-  ":hover": {
-    backgroundColor: "rgba(0, 0, 0, 0.03)",
-    transition: "0.3s ease-out all",
-    // transition: "opacity 0.3s ease-out 0s",
-  },
+  flexDirection: "column",
+  justifyContent: "flex-start",
+  alignItems: "center",
 }));
 
 export const AvatarContainer = styled("div")(({ theme }) => ({
-  width: "10%",
-  minHeight: "25vh",
+  width: "100%",
+  minHeight: "5vh",
   height: "max-content",
-  paddingTop: "2.5vw",
-  paddingLeft: "1vw",
+  marginTop: "1.5vh",
   display: "flex",
-  justifyContent: "flex-start",
-  alignItems: "start",
+  justifyContent: "space-between",
+  alignItems: "center",
   "& .MuiAvatar-root": {
-    height: "50px",
-    width: "50px",
-  },
-  [theme.breakpoints.down("md")]: {
-    paddingTop: "3vw",
-    paddingLeft: "2.5vw",
+    height: "45px",
+    width: "45px",
   },
   [theme.breakpoints.down("sm")]: {
-    paddingTop: "5vw",
-    paddingLeft: "2.5vw",
     "& .MuiAvatar-root": {
-      height: "47.5px",
-      width: "47.5px",
+      height: "45px",
+      width: "45px",
     },
   },
 }));
 
+export const AvatarAndNameContainer = styled("div")(({ theme }) => ({
+  width: "40%",
+  height: "100%",
+  paddingLeft: "2vw",
+  display: "flex",
+  justifyContent: "flex-start",
+  alignItems: "center",
+  [theme.breakpoints.down("sm")]: {
+    width: "70%",
+  },
+}));
+
 export const SecondContainer = styled("form")(({ theme }) => ({
-  width: "90%",
+  width: "97.5%",
   minHeight: "20vh",
   height: "100%",
   margin: "15px",
@@ -61,20 +62,15 @@ export const SecondContainer = styled("form")(({ theme }) => ({
   alignItems: "center",
 }));
 
-export const OptionsButtonContainer = styled("div")(({ theme }) => ({
-  width: "100%",
-  height: "5vh",
-  display: "flex",
-  justifyContent: "flex-end",
-  alignItems: "center",
-}));
-
 export const DeleteIconbutton = styled(IconButton)(({ theme }) => ({
   position: "relative",
   right: "0",
   top: "0",
   ".MuiSvgIcon-root": {
     fontSize: "25px",
+  },
+  [theme.breakpoints.down("sm")]: {
+    paddingRight: "5vw",
   },
 }));
 
@@ -91,13 +87,10 @@ export const ItemsContainer = styled("div")(({ theme }) => ({
 }));
 
 export const DescriptionContainer = styled("div")(({ theme }) => ({
-  // height: "auto",
   minHeight: "10vh",
   width: "100%",
   overflowY: "visible",
   padding: "10px",
-  marginLeft: "-2.5vw",
-  marginBottom: "10px",
   border: "none",
   fontFamily: "Arial",
   fontSize: "18px",
@@ -105,6 +98,10 @@ export const DescriptionContainer = styled("div")(({ theme }) => ({
   flexDirection: "column",
   justifyContent: "space-between",
   alignItems: "start",
+  [theme.breakpoints.down("sm")]: {
+    minHeight: "5vh",
+    justifyContent: "flex-end",
+  },
 }));
 
 export const ImageContainer = styled("div")(({ theme }) => ({
@@ -136,9 +133,15 @@ export const CommentIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 export const CommentFont = styled(Typography)(({ theme }) => ({
-  color: "rgb(83, 100, 113)",
-  fontWeight: 700,
+  color: "gray",
   fontSize: "18px",
+
+  strong: {
+    color: "#000",
+  },
+  [theme.breakpoints.down("sm")]: {
+    paddingLeft: "2.5vw",
+  },
 }));
 
 export const LikeIconButton = styled(IconButton)(({ theme }) => ({
@@ -155,12 +158,26 @@ export const UsernameFont = styled(Typography)(({ theme }) => ({
   color: "rgb(15, 20, 25)",
   fontWeight: 700,
   fontSize: "20px",
-  marginTop: "-3.5vh",
-  marginLeft: "-0.5vw",
-  marginBottom: "5vh",
+  marginLeft: "1vw",
+}));
+
+export const Dot = styled(Typography)(({ theme }) => ({
+  color: "gray",
+  textAlign: "center",
+  fontSize: "20px",
+}));
+
+export const DateFont = styled(Typography)(({ theme }) => ({
+  width: "100%",
+  height: "7.5vh",
+  color: "gray",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-start",
+  textAlign: "start",
+  fontSize: "16px",
   [theme.breakpoints.down("sm")]: {
-    marginTop: "-4vh",
-    marginLeft: "2vw",
+    paddingLeft: "1.5vw",
   },
 }));
 

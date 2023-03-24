@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import Stack from "@mui/material/Stack";
 
+import Swal from "sweetalert2";
+
 import Tooltip from "@mui/material/Tooltip";
 
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
@@ -11,10 +13,12 @@ import HomeIcon from "@mui/icons-material/Home";
 import LogoutIcon from "@mui/icons-material/Logout";
 import TurnedInIcon from "@mui/icons-material/TurnedIn";
 
+import { closeSnackbar, useSnackbar } from "notistack";
+
 import IconButton from "@mui/material/IconButton";
 
 /** Custom hooks */
-import { useAuthStore } from "../../../../hooks";
+import { useAuthStore, useUiStore } from "../../../../hooks";
 
 /** Material UI - Custom components */
 import {
@@ -25,6 +29,9 @@ import {
 } from "./styled";
 
 export const NavbarComputer = (): JSX.Element => {
+  /** Notifications */
+  const { enqueueSnackbar } = useSnackbar();
+
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -33,11 +40,29 @@ export const NavbarComputer = (): JSX.Element => {
   const handleHome = () => {
     if (pathname !== "/") {
       navigate("/");
+      window.scroll(0, 0);
     }
   };
 
+  const handleAccount = () => {
+    Swal.fire({
+      position: "center",
+      icon: "info",
+      title: `This page is in process!`,
+      showConfirmButton: true,
+      timer: 6000,
+    });
+  };
+
   const handleLogout = () => {
-    startLogout();
+    Swal.fire({
+      position: "center",
+      title: "Are you sure you want to logout?",
+      showCancelButton: true,
+      confirmButtonText: "Logout",
+    }).then((result) => {
+      if (result.isConfirmed) startLogout();
+    });
   };
 
   /** Render function components */
@@ -70,7 +95,7 @@ export const NavbarComputer = (): JSX.Element => {
       </IconsContainer>
       <IconsContainer>
         <Tooltip title="Account" placement="right" arrow>
-          <IconButton>
+          <IconButton onClick={handleAccount}>
             <CustomAvatar alt="Avatar" src={picture} />
           </IconButton>
         </Tooltip>

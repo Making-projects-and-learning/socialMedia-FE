@@ -1,6 +1,10 @@
 /** Libraries */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, TypedUseSelectorHook } from "react-redux";
+
+import { closeSnackbar, useSnackbar } from "notistack";
+
+import useIntersectionObserver from "@react-hook/intersection-observer";
 
 /** Store */
 import { RootState } from "../../../store";
@@ -21,8 +25,14 @@ import { ButtonContainer, PostsButton } from "./styled";
 const { NOTIFICATION, CONNECT } = socketEvents;
 
 export const NewPostsButton = (): JSX.Element => {
+  /** Notifications */
+  const { enqueueSnackbar } = useSnackbar();
+
+  /** Store */
   const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
   const { socket } = useAppSelector((state) => state.socket);
+
+  const [snackbarId, setSnackbarId] = useState<any>();
 
   const { _id } = useAuthStore();
 
@@ -32,6 +42,28 @@ export const NewPostsButton = (): JSX.Element => {
   } = useUiStore();
 
   const { LoadNewRecivedPost, LoadAllNewPosts } = usePostStore();
+
+  const [ref, setRef] = useState<HTMLDivElement | null>(null);
+
+  const { isIntersecting } = useIntersectionObserver(ref);
+
+  /** Alert up load new posts */
+  useEffect(() => {
+    console.log(isIntersecting);
+    if (status && !isIntersecting) {
+      setSnackbarId(
+        enqueueSnackbar("Load new posts", {
+          variant: "newPostsAvailable",
+          // autoHideDuration: 6000,
+          persist: true,
+          preventDuplicate: true,
+          anchorOrigin: { horizontal: "center", vertical: "top" },
+        })
+      );
+    } else {
+      closeSnackbar(snackbarId);
+    }
+  }, [status, isIntersecting]);
 
   /** New posts listener */
   useEffect(() => {
@@ -57,7 +89,7 @@ export const NewPostsButton = (): JSX.Element => {
   };
 
   const renderNewPostButton = () => (
-    <ButtonContainer>
+    <ButtonContainer ref={setRef}>
       <PostsButton onClick={handleLoadNewPosts}>
         Show {quantity} new {quantity > 1 ? "posts" : "post"}
       </PostsButton>

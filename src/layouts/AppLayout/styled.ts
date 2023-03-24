@@ -48,7 +48,7 @@ export const NavbarSectionContainer = styled("div")(({ theme }) => ({
     width: "7.5%",
   },
   [theme.breakpoints.down("sm")]: {
-    zIndex: 3000,
+    zIndex: 1000,
   },
 }));
 

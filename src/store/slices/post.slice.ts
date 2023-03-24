@@ -2,7 +2,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 /** Interface */
-import { Post } from "../../interfaces/post.interface";
+import { NonPopulatedPost, Post } from "../../interfaces/post.interface";
 import { PostState } from "../../interfaces/slices/postSlice.interface";
 
 export const postSlice = createSlice({
@@ -43,7 +43,7 @@ export const postSlice = createSlice({
         state.posts[indice] = { ...state.posts[indice], ...action.payload };
       }
     },
-    deletePost: (state, action: PayloadAction<Post>) => {
+    deletePost: (state, action: PayloadAction<NonPopulatedPost>) => {
       state.posts = state.posts.filter((e) => e._id !== action.payload._id);
     },
 

@@ -1,6 +1,8 @@
 /** Libraries */
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
+
+import { closeSnackbar, useSnackbar } from "notistack";
 
 /** Store */
 import { RootState, AppDispatch } from "../store";
@@ -9,9 +11,14 @@ import { RootState, AppDispatch } from "../store";
 import { setSocket } from "../store/slices/socket.slice";
 
 /** Sockets */
-import { getSocketInstance } from "../sockets";
+import { getSocketInstance, socketEvents } from "../sockets";
+
+const { CONNECT, DISCONNECT } = socketEvents;
 
 const useSocket = () => {
+  /** Notifications */
+  const { enqueueSnackbar } = useSnackbar();
+
   /** useDispatch setting */
   const useAppDispatch: () => AppDispatch = useDispatch;
   const dispatch = useAppDispatch();
@@ -21,8 +28,10 @@ const useSocket = () => {
   const socket = useAppSelector((state: RootState) => state.socket.socket);
   const { _id } = useAppSelector((state: RootState) => state.auth);
 
+  const [isOnline, setIsOnline] = useState<boolean>(false);
+  const [snackbarId, setSnackbarId] = useState<any>();
+
   useEffect(() => {
-    console.log(socket);
     const socketInstance = getSocketInstance();
     if (_id && !socket) {
       dispatch(setSocket(socketInstance));
@@ -33,6 +42,52 @@ const useSocket = () => {
       dispatch(setSocket(null));
     };
   }, [dispatch, _id]);
+
+  /** Create post listener */
+  useEffect(() => {
+    if (socket) {
+      socket.on(CONNECT, () => {
+        setIsOnline(true);
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off(CONNECT);
+      }
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on(DISCONNECT, () => {
+        setIsOnline(false);
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off(DISCONNECT);
+      }
+    };
+  }, [socket]);
+
+  /** Offline/online notification */
+  useEffect(() => {
+    if (isOnline) {
+      closeSnackbar(snackbarId);
+    } else {
+      if (socket?.connected !== undefined) {
+        setSnackbarId(
+          enqueueSnackbar("No connection!", {
+            variant: "error",
+            anchorOrigin: { horizontal: "center", vertical: "bottom" },
+            persist: true,
+          })
+        );
+      }
+    }
+  }, [isOnline]);
 
   return socket;
 };

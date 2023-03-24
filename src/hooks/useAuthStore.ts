@@ -23,7 +23,7 @@ import {
 
 /** Custom hooks */
 import { usePostStore } from "./usePostStore";
-import { setSocket } from "../store/slices/socket.slice";
+import { setSocket, socketLogout } from "../store/slices/socket.slice";
 import { postsLogout } from "../store/slices/post.slice";
 
 export const useAuthStore = () => {
@@ -206,7 +206,7 @@ export const useAuthStore = () => {
       dispatch(postsLogout());
 
       if (socket) socket.disconnect();
-      dispatch(setSocket(null));
+      dispatch(socketLogout());
 
       setTimeout(() => {
         dispatch(uiCloseProgressBackdrop());
